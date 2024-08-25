@@ -1,11 +1,11 @@
-import load_db
 import collections
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain_openai import OpenAIEmbeddings
 
-from config import (
+from api.load_db import DataLoader
+from api.config import (
     MODEL_TYPE_INFERENCE,
     MODEL_TYPE_EMBEDDING,
     REPO_PATH,
@@ -25,12 +25,12 @@ class HelpDesk:
         self.prompt = self.get_prompt()
 
         if self.new_db:
-            self.db = load_db.DataLoader(REPO_PATH, PERSIST_DIRECTORY).set_db(
+            self.db = DataLoader(REPO_PATH, PERSIST_DIRECTORY).set_db(
                 self.embeddings
             )
         else:
             print("Loading cached DB...")
-            self.db = load_db.DataLoader(REPO_PATH, PERSIST_DIRECTORY).get_db(
+            self.db = DataLoader(REPO_PATH, PERSIST_DIRECTORY).get_db(
                 self.embeddings
             )
             print("Loaded.")
@@ -86,10 +86,7 @@ class HelpDesk:
         return answer["result"], sources
 
     def list_top_k_sources(self, answer, k=2):
-        sources = [
-            f'{res.metadata["source"]}'
-            for res in answer["source_documents"]
-        ]
+        sources = [f'{res.metadata["source"]}' for res in answer["source_documents"]]
 
         if sources:
             k = min(k, len(sources))

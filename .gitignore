@@ -15,8 +15,10 @@ db/
 *.so
 
 # Distribution / packaging
+node_modules
 .Python
 build/
+.next
 develop-eggs/
 dist/
 downloads/
@@ -159,3 +161,5 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+api/example
