@@ -29,3 +29,15 @@ jobs:
         id: get_vercel_domain
         
 ```
+
+## Manual Vercel commands
+
+```bash
+vercel login
+
+cp ./app/.env.example ./app/.env
+grep -v '^#' ./app/.env | sed 's/^\([^=]*\)=\(.*\)$/echo "\2" | vercel env add \1 production --force /' | xargs -I {} sh -c '{}'
+grep -v '^#' ./app/.env | sed 's/^\([^=]*\)=\(.*\)$/echo "\2" | vercel env add \1 development --force /' | xargs -I {} sh -c '{}'
+
+vercel deploy 2>&1 | grep -o 'https://[a-zA-Z0-9.-]*\.vercel\.app' | head -n 1
+```

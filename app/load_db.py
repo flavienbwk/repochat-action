@@ -7,6 +7,7 @@ from langchain_chroma import Chroma
 from langchain_community.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.text_splitter import MarkdownHeaderTextSplitter
+from langchain_community.document_loaders.unstructured import UnstructuredFileLoader
 
 
 class DataLoader:
@@ -30,8 +31,10 @@ class DataLoader:
         loader = DirectoryLoader(
             self.source_directory,
             glob="**/*",
+            loader_cls=UnstructuredFileLoader,
             show_progress=True,
-            use_multithreading=True
+            use_multithreading=True,
+            exclude=["*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp", "*.tiff", "*.webp"]
         )
         docs = loader.load()
         print("Number of documents retrieved:", len(docs))
