@@ -26,7 +26,7 @@ export default function Chat() {
         setInput('');
         setIsLoading(true);
         
-        const response = await sendMessage("/query", { "prompt": input });
+        const response = await sendMessage({ "prompt": input });
         setIsLoading(false);
         setMessages((prevMessages) => [...prevMessages, { text: response.result, sender: 'bot', sources: response.sources }]);
     };
@@ -46,7 +46,7 @@ export default function Chat() {
                                         <h4>Sources:</h4>
                                         <ul>
                                             {message.sources.map((source, idx) => (
-                                                <li key={idx}>{source}</li>
+                                                <li key={idx}>- {source}</li>
                                             ))}
                                         </ul>
                                     </div>

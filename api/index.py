@@ -32,11 +32,12 @@ model = get_model()
 async def root():
     return { "message": "alive" }
 
-@app.get("/api/")
+@app.get("/api/settings")
 async def root():
     return {
+        "repo_name": REPO_NAME,
         "message": f"Welcome to the {REPO_NAME} chatbot API. Use the /query endpoint to ask questions.",
-        "warning": "This search engine may produce inaccurate explanations (called hallucinations), please verify the sources."
+        "warning_message": "This search engine may produce inaccurate explanations (called hallucinations), please verify the sources."
     }
 
 @app.post("/api/query")
