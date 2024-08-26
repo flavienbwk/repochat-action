@@ -87,17 +87,12 @@ class HelpDesk:
 
     def list_top_k_sources(self, answer, k=2):
         sources = [f'{res.metadata["source"]}' for res in answer["source_documents"]]
+        distinct_sources = []
 
         if sources:
             k = min(k, len(sources))
             distinct_sources = list(zip(*collections.Counter(sources).most_common()))[
                 0
             ][:k]
-            distinct_sources_str = "  \n- ".join(distinct_sources)
-
-        if len(distinct_sources) == 1:
-            return f"This source might help you :  \n- {distinct_sources_str}"
-        elif len(distinct_sources) > 1:
-            return f"Here are {len(distinct_sources)} sources that might help you :  \n- {distinct_sources_str}"
-        else:
-            return "Sorry I've not found any source that could help you."
+            print(distinct_sources)
+        return distinct_sources if len(distinct_sources) >= 1 else []

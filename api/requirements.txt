@@ -12,6 +12,7 @@ python-dotenv==1.0.1
 langchain_openai==0.1.17
 langchain_community==0.2.10
 unstructured==0.15.7
+unstructured[md]==0.15.7
 lxml==5.2.2
 markdownify==0.13.1
 
