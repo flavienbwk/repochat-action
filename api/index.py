@@ -4,7 +4,7 @@ from api.help_desk import HelpDesk
 import nltk
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.config import FORCE_EMBEDDINGS_DB_RELOAD, REPO_NAME
+from api.config import FORCE_EMBEDDINGS_DB_RELOAD, REPO_NAME, REPO_URL
 
 app = FastAPI(title=f"Repo {REPO_NAME}")
 
@@ -36,6 +36,7 @@ async def root():
 async def root():
     return {
         "repo_name": REPO_NAME,
+        "repo_url": REPO_URL,
         "message": f"Welcome to the {REPO_NAME} chatbot API. Use the /query endpoint to ask questions.",
         "warning_message": "This search engine may produce inaccurate explanations (called hallucinations), please verify the sources."
     }

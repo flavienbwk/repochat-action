@@ -9,6 +9,7 @@ _ = load_dotenv(find_dotenv())
 CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))
 
 REPO_NAME = os.environ['REPO_NAME'].strip()
+REPO_URL = os.getenv('REPO_URL', '').strip()
 REPO_PATH = os.environ['REPO_PATH'].strip()
 OPEN_AI_API_KEY = os.environ['OPENAI_API_KEY'].strip()
 MODEL_TYPE_INFERENCE = os.environ['MODEL_TYPE_INFERENCE'].strip()
