@@ -1,4 +1,7 @@
 repochat_env
+node_modules
+.next
+api/db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
