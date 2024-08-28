@@ -3,6 +3,8 @@ services:
   # ONLY USED TO SIMULATE A VERCEL MEMORY CONSUMPTION DURING BUILD
   appapi:
     build: .
+    env_file:
+      - .env
     ports:
       - "5328:5328"
       - "3000:3000"

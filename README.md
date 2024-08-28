@@ -27,8 +27,11 @@ jobs:
     - name: Get Vercel domain from precedent step
         run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT
         id: get_vercel_domain
-        
 ```
+
+## Why not use Vercel
+
+Vercel seem very limited when it is not about JS. This project uses a FastAPI Python API that requires at least 400MB of RAM when installing its dependencies. This exceeds Vercel's 250MB serverless function limit from AWS.
 
 ## Manual Vercel commands
 

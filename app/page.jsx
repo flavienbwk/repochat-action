@@ -19,7 +19,7 @@ export default function Home() {
   return (
     <html className="h-full">
       <body className="h-full overflow-hidden">
-        <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-center h-screen">
+        <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-between h-screen">
           <div className="w-full px-4 h-full flex items-center">
             <div className="w-full max-w-4xl mx-auto">
               <div className="relative">
@@ -36,6 +36,9 @@ export default function Home() {
               </div>
             </div>
           </div>
+          <footer className="w-full text-center py-4 text-white bg-transparent">
+            <p>Made by <a href="https://github.com/flavienbwk/repochat-action" target="_blank" rel="noopener noreferrer" className="underline">flavienbwk</a></p>
+          </footer>
         </div>
       </body>
     </html>

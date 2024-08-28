@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from api.help_desk import HelpDesk
-import nltk
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import FORCE_EMBEDDINGS_DB_RELOAD, REPO_NAME, REPO_URL
@@ -22,7 +21,6 @@ class Query(BaseModel):
     prompt: str
 
 def get_model():
-    nltk.download("punkt")
     model = HelpDesk(new_db=FORCE_EMBEDDINGS_DB_RELOAD)
     return model
 
