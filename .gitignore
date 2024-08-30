@@ -1,6 +1,5 @@
 .vercel
 repochat_env
-app/example/*
 api/example
 node_modules
 .next

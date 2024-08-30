@@ -15,6 +15,7 @@ OPEN_AI_API_KEY = os.environ['OPENAI_API_KEY'].strip()
 MODEL_TYPE_INFERENCE = os.environ['MODEL_TYPE_INFERENCE'].strip()
 MODEL_TYPE_EMBEDDING = os.environ['MODEL_TYPE_EMBEDDING'].strip()
 FORCE_EMBEDDINGS_DB_RELOAD = True if os.environ['FORCE_EMBEDDINGS_DB_RELOAD'].strip().lower() == 'true' else False
+MODE = os.environ['MODE'].strip()
 
 PATH_NAME_SPLITTER = f'{CURRENT_DIR}/splitted_docs.jsonl'
 PERSIST_DIRECTORY = f'{CURRENT_DIR}/db/chroma/'

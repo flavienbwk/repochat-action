@@ -1,0 +1,15 @@
+services:
+
+  repochat:
+    build: .
+    environment:
+      REPO_NAME: ${REPO_NAME}
+      REPO_URL: ${REPO_URL}
+      REPO_PATH: ${REPO_PATH}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      MODEL_TYPE_INFERENCE: ${MODEL_TYPE_INFERENCE}
+      MODEL_TYPE_EMBEDDING: ${MODEL_TYPE_EMBEDDING}
+      FORCE_EMBEDDINGS_DB_RELOAD: ${FORCE_EMBEDDINGS_DB_RELOAD}
+      MODE: api
+    ports:
+      - "3001:80"

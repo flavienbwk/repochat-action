@@ -1,16 +1,16 @@
 
-# Use an official Node.js runtime as the base image
+# All-in-one container for Repochat
 FROM ubuntu:22.04
 
-# Install dependencies
+ARG NODE_ENV production
+
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     build-essential libmagic1 \
     && curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
-    && apt-get install -y nodejs python3 python3-pip python3-dev \
-    && npm install -g npm \
-    && npm install -g pnpm \
+    && apt-get install -y nginx nodejs python3 python3-pip \
+    && npm install -g npm pnpm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -30,4 +30,22 @@ COPY ./app /usr/app/app
 COPY ./api /usr/app/api
 COPY next-env.d.ts next.config.js package.json postcss.config.js tailwind.config.js tsconfig.json /usr/app/
 
-ENTRYPOINT [ "npm", "run", "prod" ]
+RUN pnpm exec next telemetry disable
+RUN pnpm run build
+
+# NGINX configuration for a single endpoint
+RUN echo "events { worker_connections 1024; }" > /etc/nginx/nginx.conf && \
+    echo "http {" >> /etc/nginx/nginx.conf && \
+    echo "    server {" >> /etc/nginx/nginx.conf && \
+    echo "        listen 80;" >> /etc/nginx/nginx.conf && \
+    echo "        location / {" >> /etc/nginx/nginx.conf && \
+    echo "            proxy_pass http://127.0.0.1:3000;" >> /etc/nginx/nginx.conf && \
+    echo "        }" >> /etc/nginx/nginx.conf && \
+    echo "        location /api {" >> /etc/nginx/nginx.conf && \
+    echo "            proxy_pass http://127.0.0.1:5328;" >> /etc/nginx/nginx.conf && \
+    echo "        }" >> /etc/nginx/nginx.conf && \
+    echo "    }" >> /etc/nginx/nginx.conf && \
+    echo "}" >> /etc/nginx/nginx.conf
+
+
+ENTRYPOINT [ "sh", "-c", "service nginx start && pnpm concurrently \"pnpm run start\" \"pnpm run fastapi-prod\"" ]

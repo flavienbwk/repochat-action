@@ -5,32 +5,37 @@ from langchain.prompts import PromptTemplate
 from langchain_openai import OpenAIEmbeddings
 
 from api.load_db import DataLoader
-from api.config import (
-    MODEL_TYPE_INFERENCE,
-    MODEL_TYPE_EMBEDDING,
-    REPO_PATH,
-    PERSIST_DIRECTORY,
-)
 
 
-class HelpDesk:
+class DirLoader:
     """Create the necessary objects to create a QARetrieval chain"""
 
-    def __init__(self, new_db=True):
+    def __init__(
+        self,
+        repo_path=None,
+        force_reingest=True,
+        model_type_inference=None,
+        model_type_embedding=None,
+        persist_directory=None,
+    ):
+        self.force_reingest = force_reingest
+        self.model_type_inference = model_type_inference
+        self.model_type_embedding = model_type_embedding
+        self.repo_path = repo_path
+        self.persist_directory = persist_directory
 
-        self.new_db = new_db
         self.template = self.get_template()
         self.embeddings = self.get_embeddings()
         self.llm = self.get_llm()
         self.prompt = self.get_prompt()
 
-        if self.new_db:
-            self.db = DataLoader(REPO_PATH, PERSIST_DIRECTORY).set_db(
+        if self.force_reingest:
+            self.db = DataLoader(self.repo_path, self.persist_directory).set_db(
                 self.embeddings
             )
         else:
             print("Loading cached DB...")
-            self.db = DataLoader(REPO_PATH, PERSIST_DIRECTORY).get_db(
+            self.db = DataLoader(self.repo_path, self.persist_directory).get_db(
                 self.embeddings
             )
             print("Loaded.")
@@ -57,11 +62,11 @@ class HelpDesk:
         return prompt
 
     def get_embeddings(self) -> OpenAIEmbeddings:
-        embeddings = OpenAIEmbeddings(model=MODEL_TYPE_EMBEDDING)
+        embeddings = OpenAIEmbeddings(model=self.model_type_embedding)
         return embeddings
 
     def get_llm(self):
-        llm = ChatOpenAI(model=MODEL_TYPE_INFERENCE)
+        llm = ChatOpenAI(model=self.model_type_inference)
         return llm
 
     def get_retrieval_qa(self):
