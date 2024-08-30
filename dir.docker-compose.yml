@@ -9,9 +9,13 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       MODEL_TYPE_INFERENCE: ${MODEL_TYPE_INFERENCE}
       MODEL_TYPE_EMBEDDING: ${MODEL_TYPE_EMBEDDING}
-      FORCE_EMBEDDINGS_DB_RELOAD: ${FORCE_EMBEDDINGS_DB_RELOAD}
+      CLEAR_DB_AT_RESTART: ${CLEAR_DB_AT_RESTART}
       MODE: directory
     volumes:
       - ./api/example:/usr/app/api/example:ro  # for directory mode only
+      # - chromadb:/usr/app/db/chroma:rw  # to persist DB across reboots if desired (uncomment volumes)
     ports:
       - "3001:80"
+
+# volumes:
+#   chromadb:
