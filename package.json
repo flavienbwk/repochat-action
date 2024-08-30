@@ -1,39 +1,11 @@
 {
-  "name": "next-fastapi",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "fastapi-install": "python3 -m pip install -r requirements.txt",
-    "fastapi-dev": "python3 -m uvicorn api.index:app --reload --port 5328",
-    "fastapi-prod": "python3 -m uvicorn api.index:app --port 5328",
-    "next-dev": "next dev -H 127.0.0.1 -p 3000",
-    "dev": "pnpm run fastapi-install && concurrently \"pnpm run next-dev\" \"pnpm run fastapi-dev\"",
-    "build": "next build",
-    "start": "next start -H 127.0.0.1 -p 3000",
-    "lint": "next lint",
-    "prod": "next build && pnpm run fastapi-install && pnpm exec next telemetry disable && concurrently \"pnpm run start\" \"pnpm run fastapi-prod\""
-  },
-  "dependencies": {
-    "@types/node": "20.1.4",
-    "@types/react": "18.2.6",
-    "@types/react-dom": "18.2.4",
-    "autoprefixer": "10.4.14",
-    "concurrently": "^8.0.1",
-    "next": "13.4.3",
-    "postcss": "8.4.23",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "tailwindcss": "3.3.2",
-    "typescript": "5.0.4",
-    "react-markdown": "^9.0.1"
-  },
-  "devDependencies": {
-    "eslint": "8.40.0",
-    "eslint-config-next": "13.4.2"
-  },
-  "nextConfig": {
-    "experimental": {
-      "appDir": true
+    "name": "ga-repochat",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "build": "tsc"
+    },
+    "dependencies": {
+      "concurrently": "^8.0.1"
     }
   }
-}

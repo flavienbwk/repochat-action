@@ -5,33 +5,37 @@ FROM ubuntu:22.04
 ARG NODE_ENV production
 
 RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
-    build-essential libmagic1 \
+    curl gnupg build-essential libmagic1 \
     && curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get install -y nginx nodejs python3 python3-pip \
     && npm install -g npm pnpm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-    
 # Verify installations
 RUN node --version && npm --version && pnpm --version
 
+RUN mkdir -p /usr/app/api
+RUN mkdir -p /usr/app/app
 WORKDIR /usr/app
 
+# Installing action utils dependencies
 COPY package-lock.json package.json /usr/app/
 RUN npm ci
 
-COPY ./requirements.txt /usr/app/
-RUN python3 -m pip install -r /usr/app/requirements.txt --no-cache-dir
+# Installing app dependencies
+COPY ./app/package-lock.json ./app/package.json /usr/app/app/
+RUN cd /usr/app/app && npm ci
+
+# Installing api dependencies
+COPY ./api/requirements.txt /usr/app/api
+RUN python3 -m pip install -r /usr/app/api/requirements.txt --no-cache-dir
 
 COPY ./app /usr/app/app
 COPY ./api /usr/app/api
-COPY next-env.d.ts next.config.js package.json postcss.config.js tailwind.config.js tsconfig.json /usr/app/
+COPY ./app/next-env.d.ts ./app/next.config.js ./app/package.json ./app/postcss.config.js ./app/tailwind.config.js ./app/tsconfig.json /usr/app/
 
-RUN pnpm exec next telemetry disable
-RUN pnpm run build
+RUN cd ./app && pnpm exec next telemetry disable && pnpm run build
 
 # NGINX configuration for a single endpoint
 RUN echo "events { worker_connections 1024; }" > /etc/nginx/nginx.conf && \
@@ -47,5 +51,5 @@ RUN echo "events { worker_connections 1024; }" > /etc/nginx/nginx.conf && \
     echo "    }" >> /etc/nginx/nginx.conf && \
     echo "}" >> /etc/nginx/nginx.conf
 
-
-ENTRYPOINT [ "sh", "-c", "service nginx start && pnpm concurrently \"pnpm run start\" \"pnpm run fastapi-prod\"" ]
+COPY ./Makefile /usr/app/Makefile
+ENTRYPOINT [ "sh", "-c", "service nginx start && make prod-docker" ]

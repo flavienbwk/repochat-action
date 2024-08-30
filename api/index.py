@@ -15,6 +15,7 @@ from api.config import (
     MODEL_TYPE_EMBEDDING,
     PERSIST_DIRECTORY,
     REPO_NAME,
+    REPO_PATH,
     REPO_URL,
     MODE,
 )
@@ -35,7 +36,7 @@ def get_model():
 
     if MODE == "directory":
         return DirLoader(
-            repo_path=REPO_URL,
+            repo_path=REPO_PATH,
             force_reingest=CLEAR_DB_AT_RESTART,
             model_type_inference=MODEL_TYPE_INFERENCE,
             model_type_embedding=MODEL_TYPE_EMBEDDING,
