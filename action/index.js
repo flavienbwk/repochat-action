@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Registry, createClient } from '@scaleway/sdk';
+import { Container, createClient } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
@@ -28,7 +28,7 @@ try {
   if (!providerKeySecret) {
     throw new Error('provider_key_secret is required');
   }
-  
+
   console.log(`Directories to scan: ${dirsToScan}`);
   console.log(`OpenAI API Key: ${openaiApiKey.substring(0, 5)}...`);
   console.log(`OpenAI Model Type Inference: ${openaiModelTypeInference}`);
@@ -65,41 +65,49 @@ try {
       defaultRegion: providerDefaultRegion,
       defaultZone: providerDefaultZone,
     });
-    
 
-    // Get the current repository name
-    const repoName = process.env.GITHUB_REPOSITORY.split('/')[1];
+    const containerImage = "ghcr.io/flavienbwk/repochat-action:latest";
+    const containerNamespace = `gh-action-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
+    const containerName = `gh-action-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
+    const containerApi = new Container(client);
 
-    // Create a Scaleway registry with "repochat-" prefix
-    const registryName = `gh-repochat-${repoName}`;
-    console.log(`Creating Scaleway registry: ${registryName}`);
-
-    const registry = new Registry.v1.API(client);
+    const containerConfig = {
+      name: containerName,
+      namespaceId: containerNamespace,
+      registryImage: containerImage,
+      port: 80,
+      cpuLimit: 1000,
+      memoryLimit: 1024,
+      minScale: 0,
+      maxScale: 5,
+      description: 'Repochat Action repochat',
+      environmentVariables: {
+        OPENAI_API_KEY: openaiApiKey,
+        MODEL_TYPE_INFERENCE: openaiModelTypeInference,
+        MODEL_TYPE_EMBEDDING: openaiModelTypeEmbedding,
+        REPO_NAME: process.env.GITHUB_REPOSITORY,
+        REPO_URL: `https://github.com/${process.env.GITHUB_REPOSITORY}`,
+        MODE: 'api'
+      }
+    };
 
     try {
-      // Check if the registry already exists
-      const registries = await registry.listNamespaces().all();
-      const existingRegistry = registries.find(r => r.name === registryName);
+      // Create the container
+      const container = await containerApi.createContainer(containerConfig);
+      console.log('Container created:', container);
 
-      if (!existingRegistry) {
-        // Create the registry if it doesn't exist
-        await registry.createNamespace({
-          region: providerDefaultRegion,
-          name: registryName,
-          description: `Registry for ${repoName} RepoChatGPT`,
-        });
-        console.log(`Created Scaleway registry: ${registryName}`);
-      } else {
-        console.log(`Scaleway registry already exists: ${registryName}`);
-      }
+      // Deploy the container
+      const deployedContainer = await containerAPI.deployContainer({
+        containerId: container.id,
+      });
+      console.log('Container deployed:', deployedContainer);
+      console.log('Deployed at:', container.domainName);
     } catch (error) {
-      console.error(`Error creating/checking Scaleway registry: ${error.message}`);
-      throw error;
+      console.error('Error deploying container:', error);
     }
 
-
   }
-  
+
 
 } catch (error) {
   core.setFailed(error.message);

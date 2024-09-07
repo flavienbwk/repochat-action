@@ -114,7 +114,7 @@ make dev
 
 3. Merge on `main`
 
-    This will deploy the Docker image to latest version so it creates a release
+    This will create a release based on `package.json` and push the `:latest` Docker image.
 
 ## Why not use Vercel ?
 
