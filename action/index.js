@@ -78,7 +78,7 @@ try {
 
     try {
       // Check if the registry already exists
-      const { registries } = await registry.listNamespaces({ region: providerDefaultRegion });
+      const registries = await registry.listNamespaces().all();
       const existingRegistry = registries.find(r => r.name === registryName);
 
       if (!existingRegistry) {
