@@ -1,4 +1,3 @@
-"use strict";
 const core = require('@actions/core');
 
 try {
