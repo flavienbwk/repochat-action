@@ -74,7 +74,7 @@ try {
     const registryName = `gh-repochat-${repoName}`;
     console.log(`Creating Scaleway registry: ${registryName}`);
 
-    const registry = new Registry.v1.API();
+    const registry = new Registry.v1.API(client);
 
     try {
       // Check if the registry already exists
