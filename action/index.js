@@ -121,14 +121,14 @@ try {
           console.log('Container already exists, retrieving existing container');
           const containers = await containerApi.listContainers({ namespaceId: namespace.id });
           container = containers.containers.find(c => c.name === containerName);
-          console.log('Retrieved existing container:', container);
+          console.log('Retrieved existing container:', container.id);
           
           // Update the existing container with new configuration
           container = await containerApi.updateContainer({
             containerId: container.id,
             ...containerConfig
           });
-          console.log('Container updated:', container);
+          console.log('Container updated:', container.id);
         } else {
           throw error;
         }
@@ -138,7 +138,7 @@ try {
       const deployedContainer = await containerApi.deployContainer({
         containerId: container.id,
       });
-      console.log('Container deployed:', deployedContainer);
+      console.log('Container deployed:', container.id);
       console.log('Deployed at:', container.domainName);
 
 
@@ -147,6 +147,7 @@ try {
       const containerEndpoint = await new Promise((resolve, reject) => {
         const interval = setInterval(async () => {
           try {
+            console.log('Checking container status...');
             if (container.status === 'running') {
               clearInterval(interval);
               resolve(container.domainName);
