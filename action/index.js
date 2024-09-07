@@ -122,6 +122,13 @@ try {
           const containers = await containerApi.listContainers({ namespaceId: namespace.id });
           container = containers.containers.find(c => c.name === containerName);
           console.log('Retrieved existing container:', container);
+          
+          // Update the existing container with new configuration
+          container = await containerApi.updateContainer({
+            containerId: container.id,
+            ...containerConfig
+          });
+          console.log('Container updated:', container);
         } else {
           throw error;
         }
