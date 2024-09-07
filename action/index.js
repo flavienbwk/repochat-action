@@ -79,8 +79,7 @@ try {
       });
       console.log('Namespace created:', namespace);
     } catch (error) {
-      console.error('Error creating namespace:', error);
-      if (error.response && error.response.status === 409) {
+      if (error.status && error.status === 409) {
         console.log('Namespace already exists, retrieving existing namespace');
         const namespaces = await containerApi.listNamespaces();
         namespace = namespaces.namespaces.find(ns => ns.name === containerNamespace);
