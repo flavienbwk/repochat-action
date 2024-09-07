@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+import { createClient } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
@@ -33,9 +34,9 @@ try {
   console.log(`OpenAI Model Type Inference: ${openaiModelTypeInference}`);
   console.log(`OpenAI Model Type Embedding: ${openaiModelTypeEmbedding}`);
   console.log(`Cloud Provider: ${cloudProvider}`);
-  console.log(`Provider Key ID: ${providerKeyId.substring(0, 3)}`);
-  console.log(`Provider Key Secret: ${providerKeySecret.substring(0, 3)}...`);
-  console.log(`Provider Project ID: ${providerProjectId.substring(0, 3)}`);
+  console.log(`Provider Key ID: ${providerKeyId.substring(0, 3)}...`);
+  console.log(`Provider Key Secret: ${providerKeySecret.substring(0, 5)}...`);
+  console.log(`Provider Project ID: ${providerProjectId.substring(0, 4)}...`);
   console.log(`Provider Default Region: ${providerDefaultRegion}`);
   console.log(`Provider Default Zone: ${providerDefaultZone}`);
 
@@ -57,7 +58,6 @@ try {
       throw new Error('provider_default_zone is required');
     }
 
-    const { createClient } = require('@scaleway/sdk');
     const client = createClient({
       accessKey: providerKeyId,
       secretKey: providerKeySecret,
@@ -65,7 +65,39 @@ try {
       defaultRegion: providerDefaultRegion,
       defaultZone: providerDefaultZone,
     });
-    console.log('Scaleway API client initialized successfully');
+    
+
+    // Get the current repository name
+    const repoName = process.env.GITHUB_REPOSITORY.split('/')[1];
+
+    // Create a Scaleway registry with "repochat-" prefix
+    const registryName = `repochat-${repoName}`;
+    console.log(`Creating Scaleway registry: ${registryName}`);
+
+    const registry = new client.registry.v1.API();
+
+    try {
+      // Check if the registry already exists
+      const { registries } = await registry.listNamespaces({ region: providerDefaultRegion });
+      const existingRegistry = registries.find(r => r.name === registryName);
+
+      if (!existingRegistry) {
+        // Create the registry if it doesn't exist
+        await registry.createNamespace({
+          region: providerDefaultRegion,
+          name: registryName,
+          description: `Registry for ${repoName} RepoChatGPT`,
+        });
+        console.log(`Created Scaleway registry: ${registryName}`);
+      } else {
+        console.log(`Scaleway registry already exists: ${registryName}`);
+      }
+    } catch (error) {
+      console.error(`Error creating/checking Scaleway registry: ${error.message}`);
+      throw error;
+    }
+
+
   }
   
 
