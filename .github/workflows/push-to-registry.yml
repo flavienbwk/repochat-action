@@ -6,6 +6,7 @@ on:
         - main
     paths:
         - 'Dockerfile'
+        - 'package.json'
 
 env:
   REGISTRY: ghcr.io
