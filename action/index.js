@@ -8,8 +8,8 @@ try {
   const openaiModelTypeInference = core.getInput('openai_model_type_inference');
   const openaiModelTypeEmbedding = core.getInput('openai_model_type_embedding');
   const cloudProvider = core.getInput('cloud_provider');
-  const apiKeyId = core.getInput('provider_key_id');
-  const apiKeySecret = core.getInput('provider_key_secret');
+  const providerKeyId = core.getInput('provider_key_id');
+  const providerKeySecret = core.getInput('provider_key_secret');
   const providerProjectId = core.getInput('provider_project_id');
   const providerDefaultRegion = core.getInput('provider_default_region');
   const providerDefaultZone = core.getInput('provider_default_zone');
@@ -21,21 +21,21 @@ try {
   if (!openaiApiKey) {
     throw new Error('openai_api_key is required');
   }
-  if (!apiKeyId) {
+  if (!providerKeyId) {
     throw new Error('provider_key_id is required');
   }
-  if (!apiKeySecret) {
+  if (!providerKeySecret) {
     throw new Error('provider_key_secret is required');
   }
   
   console.log(`Directories to scan: ${dirsToScan}`);
-  console.log(`OpenAI API Key: ${openaiApiKey.substring(0, 5)}...`); // Only log the first 5 characters for security
+  console.log(`OpenAI API Key: ${openaiApiKey.substring(0, 5)}...`);
   console.log(`OpenAI Model Type Inference: ${openaiModelTypeInference}`);
   console.log(`OpenAI Model Type Embedding: ${openaiModelTypeEmbedding}`);
   console.log(`Cloud Provider: ${cloudProvider}`);
-  console.log(`API Key ID: ${apiKeyId}`);
-  console.log(`API Key Secret: ${apiKeySecret.substring(0, 5)}...`); // Only log the first 5 characters for security
-  console.log(`Provider Project ID: ${providerProjectId}`);
+  console.log(`Provider Key ID: ${providerKeyId.substring(0, 3)}`);
+  console.log(`Provider Key Secret: ${providerKeySecret.substring(0, 3)}...`);
+  console.log(`Provider Project ID: ${providerProjectId.substring(0, 3)}`);
   console.log(`Provider Default Region: ${providerDefaultRegion}`);
   console.log(`Provider Default Zone: ${providerDefaultZone}`);
 
@@ -59,8 +59,8 @@ try {
 
     const { createClient } = require('@scaleway/sdk');
     const client = createClient({
-      accessKey: apiKeyId,
-      secretKey: apiKeySecret,
+      accessKey: providerKeyId,
+      secretKey: providerKeySecret,
       defaultProjectId: providerProjectId,
       defaultRegion: providerDefaultRegion,
       defaultZone: providerDefaultZone,
