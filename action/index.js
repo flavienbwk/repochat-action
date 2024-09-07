@@ -69,7 +69,7 @@ try {
     const containerImage = "ghcr.io/flavienbwk/repochat-action:latest";
     const containerNamespace = `gh-action-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
     const containerName = `gh-action-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
-    const containerApi = new Container(client);
+    const containerAPI = new Container.v1beta1.API(client);
 
     const containerConfig = {
       name: containerName,
