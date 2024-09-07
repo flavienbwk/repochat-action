@@ -178,6 +178,9 @@ try {
     }
     
   }
+  
+  core.setOutput('domain', containerEndpoint);
+  
 } catch (error) {
   core.setFailed(error.message);
 }
