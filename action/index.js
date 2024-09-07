@@ -140,27 +140,29 @@ try {
       });
       console.log('Container deployed:', deployedContainer);
       console.log('Deployed at:', container.domainName);
+
+
+
+      // Now, retrieve container's endpoint, wait until it's ready with a 1 minute timeout
+      const containerEndpoint = await new Promise((resolve, reject) => {
+        const interval = setInterval(async () => {
+          try {
+            if (container.status === 'running') {
+              clearInterval(interval);
+              resolve(container.domainName);
+            }
+          } catch (error) {
+            throw('Error retrieving container:', error);
+          }
+        }, 1000);
+      });
+      console.log('Container endpoint ready!', containerEndpoint);
+
+      // Feed RepoChat with repo data
     } catch (error) {
       console.error('Error deploying container:', error);
     }
-
-    // Now, retrieve container's endpoint, wait until it's ready with a 1 minute timeout
-    const containerEndpoint = await new Promise((resolve, reject) => {
-      const interval = setInterval(async () => {
-        try {
-          if (container.status === 'running') {
-            clearInterval(interval);
-            resolve(container.domainName);
-          }
-        } catch (error) {
-          throw('Error retrieving container:', error);
-        }
-      }, 1000);
-    });
-    console.log('Container endpoint ready!', containerEndpoint);
-
-    // Feed RepoChat with repo data
-
+    
   }
 
 
