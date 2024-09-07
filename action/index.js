@@ -71,6 +71,25 @@ try {
     const containerName = `gh-action-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
     const containerApi = new Container.v1beta1.API(client);
 
+    let namespace;
+    try {
+      namespace = await containerApi.createNamespace({
+        name: containerNamespace,
+        description: 'Namespace for GitHub Action',
+      });
+      console.log('Namespace created:', namespace);
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        console.log('Namespace already exists, retrieving existing namespace');
+        const namespaces = await containerApi.listNamespaces();
+        namespace = namespaces.namespaces.find(ns => ns.name === containerNamespace);
+        console.log('Retrieved existing namespace:', namespace);
+      } else {
+        console.error('Error creating/retrieving namespace:', error);
+        throw error;
+      }
+    }
+
     const containerConfig = {
       name: containerName,
       namespaceId: containerNamespace,
