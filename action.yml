@@ -20,12 +20,21 @@ inputs:
     description: 'Cloud provider'
     default: 'scaleway'
     required: false
-  api_key_id:
+  provider_key_id:
     description: 'Cloud provider API key ID'
     required: true
-  api_key_secret:
+  provider_key_secret:
     description: 'Cloud provider API key secret'
     required: true
+  provider_default_region:
+    description: 'Cloud provider default region'
+    required: true
+  provider_default_zone:
+    description: 'Cloud provider default zone'
+    required: true
+  provider_project_id:
+    description: 'Cloud provider project ID (Scaleway specific)'
+    required: false
 runs:
   using: 'node16'
   main: 'lib/index.js'

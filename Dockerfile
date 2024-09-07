@@ -21,7 +21,7 @@ WORKDIR /usr/app
 
 # Installing action utils dependencies
 COPY package-lock.json package.json /usr/app/
-RUN npm ci
+RUN npm i -g concurrently@8.2.2 && npm ci
 
 # Installing app dependencies
 COPY ./app/package-lock.json ./app/package.json /usr/app/app/

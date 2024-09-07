@@ -1,4 +1,4 @@
-name: "repochat-action"
+name: "Deploy Repochat for this repo"
 
 on:
     workflow_dispatch:
@@ -18,5 +18,8 @@ jobs:
                 openai_model_type_inference: "gpt-4o-mini"
                 openai_model_type_embedding : "text-embedding-3-small"
                 cloud_provider: 'scaleway'
-                api_key_id: ${{ secrets.API_KEY_ID }}
-                api_key_secret: ${{ secrets.API_KEY_SECRET }}
+                provider_key_id: ${{ secrets.PROVIDER_KEY_ID }}
+                provider_key_secret: ${{ secrets.PROVIDER_KEY_SECRET }}
+                provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
+                provider_default_region: 'fr-par'
+                provider_default_zone: 'fr-par-2'
