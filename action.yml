@@ -27,9 +27,12 @@ inputs:
     description: 'Cloud provider API key secret'
     required: true
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
-  pre: 'npm ci'
+  using: "composite"
+  steps:
+    - run: npm install
+      shell: bash
+    - run: node dist/index.js
+      shell: bash
 branding:
   icon: 'code'
   color: 'purple'
