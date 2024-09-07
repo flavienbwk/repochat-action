@@ -141,8 +141,6 @@ try {
       console.log('Container deployed:', container.id);
       console.log('Deployed at:', container.domainName);
 
-
-
       // Now, retrieve container's endpoint, wait until it's ready with a timeout
       let containerEndpoint;
       try {
@@ -151,6 +149,8 @@ try {
           const timeout = 120000; // 2 minutes timeout
           const interval = setInterval(async () => {
             try {
+              // Update container variable with current status
+              container = await containerApi.getContainer(container.id);
               console.log('Checking container status every 5 seconds...', container.status);
               if (container.status === 'running') {
                 clearInterval(interval);
