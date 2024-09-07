@@ -3,9 +3,10 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-      "build": "tsc"
+        "build": "tsc"
     },
     "dependencies": {
-      "concurrently": "^8.0.1"
+        "@actions/core": "^1.10.1",
+        "concurrently": "^8.0.1"
     }
-  }
+}
