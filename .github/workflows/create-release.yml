@@ -13,27 +13,48 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
-      - name: Get version from package.json
-        id: package-version
+      - name: Get current version from package.json
+        id: current-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
+      - name: Get previous version from package.json
+        id: previous-version
+        run: |
+          git checkout HEAD~1
+          echo "::set-output name=value::$(npm pkg get version | tr -d '"')"
+          git checkout -
+
+      - name: Check if version has changed
+        id: version-changed
+        run: |
+          if [ "${{ steps.current-version.outputs.current-version }}" != "${{ steps.previous-version.outputs.value }}" ]; then
+            echo "::set-output name=changed::true"
+          else
+            echo "::set-output name=changed::false"
+          fi
+
       - name: Extract major version
+        if: steps.version-changed.outputs.changed == 'true'
         id: major-version
-        run: echo "::set-output name=value::$(echo ${{ steps.package-version.outputs.current-version}} | cut -d. -f1)"
+        run: echo "::set-output name=value::$(echo ${{ steps.current-version.outputs.current-version}} | cut -d. -f1)"
 
       - name: Create Release
+        if: steps.version-changed.outputs.changed == 'true'
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.package-version.outputs.current-version}}
-          release_name: Release v${{ steps.package-version.outputs.current-version}}
+          tag_name: v${{ steps.current-version.outputs.current-version}}
+          release_name: Release v${{ steps.current-version.outputs.current-version}}
           draft: false
           prerelease: false
 
       - name: Create Major Version Tag
+        if: steps.version-changed.outputs.changed == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
