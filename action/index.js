@@ -92,7 +92,7 @@ try {
 
     const containerConfig = {
       name: containerName,
-      namespaceId: containerNamespace,
+      namespaceId: namespace.id,
       registryImage: containerImage,
       port: 80,
       cpuLimit: 1000,
