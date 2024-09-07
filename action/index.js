@@ -69,7 +69,7 @@ try {
     const containerImage = "ghcr.io/flavienbwk/repochat-action:latest";
     const containerNamespace = `gh-action-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
     const containerName = `gh-action-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
-    const containerAPI = new Container.v1beta1.API(client);
+    const containerApi = new Container.v1beta1.API(client);
 
     const containerConfig = {
       name: containerName,
@@ -97,7 +97,7 @@ try {
       console.log('Container created:', container);
 
       // Deploy the container
-      const deployedContainer = await container.deployContainer({
+      const deployedContainer = await containerAPI.deployContainer({
         containerId: container.id,
       });
       console.log('Container deployed:', deployedContainer);
