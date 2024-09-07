@@ -89,7 +89,7 @@ jobs:
     docker compose -f api.docker-compose.yml up -d
     ```
 
-3. Inject data taking example on the `./scripts/ingest-docs-api.py` Python script
+3. Inject data taking example on the [Python](./scripts/ingest-docs-api.py) or [JS](./scripts/ingest-docs-api.js) scripts
 
 4. Access the app at `http://localhost:3001`
 

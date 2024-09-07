@@ -98,7 +98,7 @@ try {
       cpuLimit: 1000,
       memoryLimit: 1024,
       minScale: 0,
-      maxScale: 5,
+      maxScale: 2,
       description: 'Repochat Action repochat',
       environmentVariables: {
         OPENAI_API_KEY: openaiApiKey,
@@ -111,12 +111,24 @@ try {
     };
 
     try {
-      // Create the container
-      const container = await containerApi.createContainer(containerConfig);
-      console.log('Container created:', container);
+      let container;
+      try {
+        // Try to create the container
+        container = await containerApi.createContainer(containerConfig);
+        console.log('Container created:', container);
+      } catch (error) {
+        if (error.status && error.status === 409) {
+          console.log('Container already exists, retrieving existing container');
+          const containers = await containerApi.listContainers({ namespaceId: namespace.id });
+          container = containers.containers.find(c => c.name === containerName);
+          console.log('Retrieved existing container:', container);
+        } else {
+          throw error;
+        }
+      }
 
       // Deploy the container
-      const deployedContainer = await containerAPI.deployContainer({
+      const deployedContainer = await containerApi.deployContainer({
         containerId: container.id,
       });
       console.log('Container deployed:', deployedContainer);
