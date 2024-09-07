@@ -1,0 +1,34 @@
+name: 'Repochat Action'
+description: 'Chat with your repo in one Action'
+author: 'flavienbwk'
+inputs:
+  dirs_to_scan:
+    description: 'Comma-separated list of directories that you want to chat about'
+    required: true
+  openai_api_key:
+    description: 'Your OpenAI API key'
+    required: true
+  openai_model_type_inference:
+    description: 'OpenAI model type for inference'
+    default: 'gpt-4o-mini'
+    required: false
+  openai_model_type_embedding:
+    description: 'OpenAI model type for embedding'
+    default: 'text-embedding-3-small'
+    required: false
+  cloud_provider:
+    description: 'Cloud provider'
+    default: 'scaleway'
+    required: false
+  api_key_id:
+    description: 'Cloud provider API key ID'
+    required: true
+  api_key_secret:
+    description: 'Cloud provider API key secret'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+branding:
+  icon: 'code'
+  color: 'purple'

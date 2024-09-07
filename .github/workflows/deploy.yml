@@ -1,0 +1,19 @@
+name: "repochat-action"
+
+on:
+    workflow_dispatch:
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: ./
+              with:
+                dirs_to_scan: "./example,README.md" # comma-separated glob dirs to analyze from this repo
+                openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+                openai_model_type_inference: "gpt-4o-mini"
+                openai_model_type_embedding : "text-embedding-3-small"
+                cloud_provider: 'scaleway'
+                api_key_id: ${{ secrets.API_KEY_ID }}
+                api_key_secret: ${{ secrets.API_KEY_SECRET }}
