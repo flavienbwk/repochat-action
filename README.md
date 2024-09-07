@@ -1,5 +1,9 @@
 # Repochat Action
 
+> [!CAUTION]
+> This project is currently NOT ready.
+> This project is in early development and may contain bugs or incomplete features. Use with caution in production environments.
+
 Chat with your repo in under 2 minutes using GitHub Actions on supported Cloud providers.
 
 Repochat is a LLM chatbot with stateless data ingestion capabilities through its API.
