@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { createClient } from '@scaleway/sdk';
+import { Registry, createClient } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
@@ -36,9 +36,6 @@ try {
   console.log(`Cloud Provider: ${cloudProvider}`);
   console.log(`Provider Key ID: ${providerKeyId.substring(0, 3)}...`);
   console.log(`Provider Key Secret: ${providerKeySecret.substring(0, 5)}...`);
-  console.log(`Provider Project ID: ${providerProjectId.substring(0, 4)}...`);
-  console.log(`Provider Default Region: ${providerDefaultRegion}`);
-  console.log(`Provider Default Zone: ${providerDefaultZone}`);
 
 
   // Check if the provider is supported
@@ -57,6 +54,9 @@ try {
     if (!providerDefaultZone) {
       throw new Error('provider_default_zone is required');
     }
+    console.log(`Provider Project ID: ${providerProjectId.substring(0, 4)}...`);
+    console.log(`Provider Default Region: ${providerDefaultRegion}`);
+    console.log(`Provider Default Zone: ${providerDefaultZone}`);
 
     const client = createClient({
       accessKey: providerKeyId,
@@ -71,10 +71,10 @@ try {
     const repoName = process.env.GITHUB_REPOSITORY.split('/')[1];
 
     // Create a Scaleway registry with "repochat-" prefix
-    const registryName = `repochat-${repoName}`;
+    const registryName = `gh-repochat-${repoName}`;
     console.log(`Creating Scaleway registry: ${registryName}`);
 
-    const registry = new client.registry.v1.API();
+    const registry = new Registry.v1.API();
 
     try {
       // Check if the registry already exists
