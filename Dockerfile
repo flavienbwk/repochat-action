@@ -41,7 +41,8 @@ RUN cd ./app && pnpm exec next telemetry disable && pnpm run build
 RUN echo "events { worker_connections 1024; }" > /etc/nginx/nginx.conf && \
     echo "http {" >> /etc/nginx/nginx.conf && \
     echo "    server {" >> /etc/nginx/nginx.conf && \
-    echo "        listen 80;" >> /etc/nginx/nginx.conf && \
+    echo "        listen 80 default_server;" >> /etc/nginx/nginx.conf && \
+    echo "        server_name _;" >> /etc/nginx/nginx.conf && \
     echo "        location / {" >> /etc/nginx/nginx.conf && \
     echo "            proxy_pass http://127.0.0.1:3000;" >> /etc/nginx/nginx.conf && \
     echo "        }" >> /etc/nginx/nginx.conf && \
