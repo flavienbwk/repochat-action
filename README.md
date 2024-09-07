@@ -54,6 +54,14 @@ jobs:
 
 4. Access the app at `http://localhost:3001`
 
+## Update the Action
+
+Run the following command and push `./lib/index.js`:
+
+```bash
+npm run build
+```
+
 ## Why not use Vercel ?
 
 Vercel is very limited when deploying everything but JS. First, ChromaDB (and any sqlite-based library) [is not supported in Vercel](https://vercel.community/t/is-vercel-incompatible-with-chromadb-sqlite/787). Then, this project uses a FastAPI Python API that requires more storage than [Vercel's 250MB bundle limit](https://vercel.com/docs/functions/runtimes#bundle-size-limits).
