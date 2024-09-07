@@ -53,15 +53,29 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Create Major Version Tag
+      - name: Create or Update Major Version Tag
         if: steps.version-changed.outputs.changed == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/v${{ steps.major-version.outputs.value }}',
-              sha: context.sha
-            })
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/tags/v${{ steps.major-version.outputs.value }}',
+                sha: context.sha
+              });
+            } catch (error) {
+              if (error.status === 422) {
+                await github.rest.git.updateRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: 'tags/v${{ steps.major-version.outputs.value }}',
+                  sha: context.sha,
+                  force: true
+                });
+              } else {
+                throw error;
+              }
+            }
