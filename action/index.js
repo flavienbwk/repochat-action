@@ -150,8 +150,7 @@ try {
           const interval = setInterval(async () => {
             try {
               // Update container variable with current status
-              console.log('Checking container ID ', container.id);
-              const _container = await containerApi.getContainer(container.id);
+              const _container = await containerApi.getContainer({ containerId: container.id });
               console.log('Checking container status every 5 seconds...', _container.status);
               if (_container.status === 'running') {
                 clearInterval(interval);
