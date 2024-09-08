@@ -34,10 +34,3 @@ jobs:
             - name: Get repochat domain
               run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT
               id: repochat_domain
-
-            - name: Set repo's website URL
-              run: |
-                gh repo edit ${{ github.repository }} --homepage "https://$DOMAIN"
-              env:
-                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              
