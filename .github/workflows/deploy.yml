@@ -12,6 +12,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - uses: ./
+              name: 'Deploy Repochat'
               id: deploy_repochat
               with:
                 dirs_to_scan: "README.md,package.json" # comma-separated glob dirs to analyze from this repo
