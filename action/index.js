@@ -6,18 +6,24 @@ import { Container, createClient } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
+function uuidv4() {
+  return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+    (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+  );
+}
+
 function isValidFile(filePath) {
   return fs.statSync(filePath).isFile() && !path.basename(filePath).startsWith('.');
 }
 
-async function sendFileToApi(filePath, apiUrl) {
+async function sendFileToApi(filePath, apiUrl, ingestSecret) {
   const content = fs.readFileSync(filePath, { encoding: 'base64' });
   const metadata = { 'source': path.basename(filePath) };
   const payload = { 'content': content, 'metadata': metadata };
 
   try {
     console.log(`Sending: ${filePath}`);
-    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
+    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json', 'X-Ingest-Secret': ingestSecret } });
     return response;
   } catch (error) {
     console.error(`Error sending file: ${error.message}`);
@@ -34,7 +40,7 @@ function isExcluded(filePath, excludeFiles) {
 
 async function processFile(filePath, apiUrl) {
   console.log(`Sending file: ${filePath}`);
-  const response = await sendFileToApi(filePath, apiUrl);
+  const response = await sendFileToApi(filePath, apiUrl, ingestSecret);
   if (response.status === 200) {
     console.log(`Successfully ingested: ${filePath}`);
   } else {
@@ -86,6 +92,7 @@ try {
   const providerProjectId = core.getInput('provider_project_id');
   const providerDefaultRegion = core.getInput('provider_default_region');
   const providerDefaultZone = core.getInput('provider_default_zone');
+  const ingestSecret = uuidv4();
 
   // Check required parameters
   if (!dirsToScan) {
@@ -176,6 +183,7 @@ try {
         OPENAI_API_KEY: openaiApiKey,
         MODEL_TYPE_INFERENCE: openaiModelTypeInference,
         MODEL_TYPE_EMBEDDING: openaiModelTypeEmbedding,
+        INGEST_SECRET: ingestSecret,
         REPO_NAME: process.env.GITHUB_REPOSITORY,
         REPO_URL: `https://github.com/${process.env.GITHUB_REPOSITORY}`,
         MODE: 'api'
@@ -247,7 +255,7 @@ try {
       // Wait for settings endpoint to be available
       const settingsEndpoint = 'https://' + containerEndpoint + '/api/settings';
       try {
-        console.log('Checking settings endpoint:', settingsEndpoint);
+        console.log('Checking settings endpoint...');
         const startTime = Date.now();
         const timeout = 30000; // 30 seconds timeout
         

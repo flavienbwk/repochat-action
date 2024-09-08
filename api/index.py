@@ -3,7 +3,7 @@ import base64
 import binascii
 import shutil
 import logging
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from api.dir_loader import DirLoader
 from api.api_loader import APILoader
@@ -14,6 +14,7 @@ from api.config import (
     MODEL_TYPE_INFERENCE,
     MODEL_TYPE_EMBEDDING,
     PERSIST_DIRECTORY,
+    INGEST_SECRET,
     REPO_NAME,
     REPO_PATH,
     REPO_URL,
@@ -88,9 +89,11 @@ class IngestData(BaseModel):
     metadata: dict
 
 @app.post("/api/ingest")
-async def ingest(data: IngestData):
+async def ingest(data: IngestData, x_ingest_secret: str = Header(..., alias="X-Ingest-Secret")):
     if MODE != "api":
-        raise HTTPException(status_code=400, detail="Ingestion is only available in API mode")
+        raise HTTPException(status_code=400, detail="Ingestion is only available in API mode (set env MODE=api)")
+    if x_ingest_secret != INGEST_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid ingest secret")
     try:
         decoded_content = base64.b64decode(data.content).decode('utf-8')
         if not decoded_content.strip():

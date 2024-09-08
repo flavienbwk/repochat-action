@@ -37,7 +37,7 @@ export default function Home() {
             </div>
           </div>
           <footer className="w-full text-center py-4 text-white bg-transparent">
-            <p>Made by <a href="https://github.com/flavienbwk/repochat-action" target="_blank" rel="noopener noreferrer" className="underline">flavienbwk</a></p>
+            <p>Deployed with <a href="https://github.com/flavienbwk/repochat-action" target="_blank" rel="noopener noreferrer" className="underline">RepoChat</a></p>
           </footer>
         </div>
       </body>

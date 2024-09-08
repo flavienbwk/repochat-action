@@ -7,14 +7,19 @@ function isValidFile(filePath) {
   return fs.statSync(filePath).isFile() && !path.basename(filePath).startsWith('.');
 }
 
-async function sendFileToApi(filePath, apiUrl) {
+async function sendFileToApi(filePath, apiUrl, ingestSecret) {
   const content = fs.readFileSync(filePath, { encoding: 'base64' });
   const metadata = { 'source': path.basename(filePath) };
   const payload = { 'content': content, 'metadata': metadata };
 
   try {
     console.log(`Sending: ${filePath} to ${apiUrl}`);
-    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
+    const response = await axios.post(apiUrl, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Ingest-Secret': ingestSecret
+      }
+    });
     return response;
   } catch (error) {
     console.error(`Error sending file: ${error.message}`);
@@ -29,9 +34,9 @@ function isExcluded(filePath, excludeFiles) {
   });
 }
 
-async function processFile(filePath, apiUrl) {
+async function processFile(filePath, apiUrl, ingestSecret) {
   console.log(`Sending file: ${filePath}`);
-  const response = await sendFileToApi(filePath, apiUrl);
+  const response = await sendFileToApi(filePath, apiUrl, ingestSecret);
   if (response.status === 200) {
     console.log(`Successfully ingested: ${filePath}`);
   } else {
@@ -39,7 +44,7 @@ async function processFile(filePath, apiUrl) {
   }
 }
 
-async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
+async function ingestFiles(directoryPath, apiUrl, ingestSecret, excludeFiles = []) {
   if (!fs.existsSync(directoryPath)) {
     console.error(`Error: ${directoryPath} does not exist.`);
     return;
@@ -48,7 +53,7 @@ async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
   const stats = fs.statSync(directoryPath);
   if (stats.isFile()) {
     if (isValidFile(directoryPath) && !isExcluded(directoryPath, excludeFiles)) {
-      await processFile(directoryPath, apiUrl);
+      await processFile(directoryPath, apiUrl, ingestSecret);
     }
     return;
   }
@@ -63,9 +68,9 @@ async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
   for (const file of files) {
     const filePath = path.join(directoryPath, file.name);
     if (file.isDirectory()) {
-      await ingestFiles(filePath, apiUrl, excludeFiles);
+      await ingestFiles(filePath, apiUrl, ingestSecret, excludeFiles);
     } else if (isValidFile(filePath) && !isExcluded(filePath, excludeFiles)) {
-      await processFile(filePath, apiUrl);
+      await processFile(filePath, apiUrl, ingestSecret);
     } else {
       console.log(`Skipping invalid, hidden, or excluded file: ${filePath}`);
     }
@@ -75,12 +80,13 @@ async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
 program
   .description('Ingest files from a directory to the API')
   .argument('<path>', 'Path to the directory containing files to ingest')
+  .requiredOption('--ingest-secret <secret>', 'Ingest secret for API authentication')
   .option('--endpoint <url>', 'API endpoint URL', 'http://localhost:5328')
   .option('--exclude <files>', 'Comma-separated list of files or patterns to exclude', 'node_modules,.git,.env,package-lock.json')
   .action(async (directoryPath, options) => {
     const apiUrl = `${options.endpoint}/api/ingest`;
     const excludeFiles = options.exclude.split(',').map(item => item.trim());
-    await ingestFiles(directoryPath, apiUrl, excludeFiles);
+    await ingestFiles(directoryPath, apiUrl, options.ingestSecret, excludeFiles);
   });
 
 program.parse(process.argv);

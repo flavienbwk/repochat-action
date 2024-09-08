@@ -130,6 +130,7 @@ make dev
 - [x] API data chat
 - [x] GitHub Actions release
 - [ ] Secure ingestion endpoint (/api/ingest)
+- [ ] Secure RepoChat with optional password
 
 ## Why not use Vercel ?
 

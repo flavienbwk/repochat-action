@@ -1,4 +1,4 @@
-# Usage: python3 ingest_files.py /path/to/your/directory
+# Usage: python3 ingest_files.py /path/to/your/directory_or_file --ingest-secret YOUR_SECRET
 
 import os
 import requests
@@ -7,9 +7,9 @@ import base64
 from pathlib import Path
 
 def is_valid_file(file_path):
-    return os.path.isfile(file_path) and not file_path.startswith('.')
+    return os.path.isfile(file_path) and not os.path.basename(file_path).startswith('.')
 
-def send_file_to_api(file_path, api_url):
+def send_file_to_api(file_path, api_url, ingest_secret):
     with open(file_path, 'rb') as file:
         content = base64.b64encode(file.read()).decode('utf-8')
     
@@ -20,32 +20,40 @@ def send_file_to_api(file_path, api_url):
         "metadata": metadata
     }
     
-    response = requests.post(api_url, json=payload)
+    headers = {
+        "X-Ingest-Secret": ingest_secret
+    }
+    
+    response = requests.post(api_url, json=payload, headers=headers)
     return response
 
-def main(directory_path, api_url):
-    directory = Path(directory_path)
-    if not directory.is_dir():
-        print(f"Error: {directory_path} is not a valid directory.")
-        return
-
-    for root, _, files in os.walk(directory):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if is_valid_file(file_path):
-                print(f"Sending file: {file_path}")
-                response = send_file_to_api(file_path, api_url)
-                if response.status_code == 200:
-                    print(f"Successfully ingested: {file_path}")
-                else:
-                    print(f"Failed to ingest {file_path}. Status code: {response.status_code}")
+def process_path(path, api_url, ingest_secret):
+    if os.path.isfile(path):
+        if is_valid_file(path):
+            print(f"Sending file: {path}")
+            response = send_file_to_api(path, api_url, ingest_secret)
+            if response.status_code == 200:
+                print(f"Successfully ingested: {path}")
             else:
-                print(f"Skipping invalid or hidden file: {file_path}")
+                print(f"Failed to ingest {path}. Status code: {response.status_code}")
+        else:
+            print(f"Skipping invalid or hidden file: {path}")
+    elif os.path.isdir(path):
+        for root, _, files in os.walk(path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                process_path(file_path, api_url, ingest_secret)
+    else:
+        print(f"Error: {path} is not a valid file or directory.")
+
+def main(path, api_url, ingest_secret):
+    process_path(path, api_url, ingest_secret)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Ingest files from a directory to the API")
-    parser.add_argument("path", help="Path to the directory containing files to ingest")
+    parser = argparse.ArgumentParser(description="Ingest files from a directory or a single file to the API")
+    parser.add_argument("path", help="Path to the directory or file to ingest")
     parser.add_argument("--endpoint", default="http://localhost:5328", help="API endpoint URL")
+    parser.add_argument("--ingest-secret", required=True, help="Secret key for API authentication")
     args = parser.parse_args()
 
-    main(args.path, f"{args.endpoint}/api/ingest")
+    main(args.path, f"{args.endpoint}/api/ingest", args.ingest_secret)
