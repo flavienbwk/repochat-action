@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 import * as core from '@actions/core';
 import { Container, createClient } from '@scaleway/sdk';
 
@@ -16,11 +17,7 @@ async function sendFileToApi(filePath, apiUrl) {
 
   try {
     console.log(`Sending: ${filePath} to ${apiUrl}`);
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
     return response;
   } catch (error) {
     console.error(`Error sending file: ${error.message}`);
@@ -36,10 +33,10 @@ function isExcluded(filePath, excludeFiles) {
 }
 
 async function processFile(filePath, apiUrl) {
-  console.log(`Sending file: $action/index.js`);
+  console.log(`Sending file: ${filePath}`);
   const response = await sendFileToApi(filePath, apiUrl);
   if (response.status === 200) {
-    console.log(`Successfully ingested: $action/index.js`);
+    console.log(`Successfully ingested: ${filePath}`);
   } else {
     console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
   }
@@ -73,7 +70,7 @@ async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
     } else if (isValidFile(filePath) && !isExcluded(filePath, excludeFiles)) {
       await processFile(filePath, apiUrl);
     } else {
-      console.log(`Skipping invalid, hidden, or excluded file: $action/index.js`);
+      console.log(`Skipping invalid, hidden, or excluded file: ${filePath}`);
     }
   }
 }
@@ -247,9 +244,43 @@ try {
         core.setFailed(`Action failed: ${error.message}`);
       }
 
+      // Wait for settings endpoint to be available
       const settingsEndpoint = 'https://' + containerEndpoint + '/api/settings';
-      console.log(await fetch(settingsEndpoint));
-
+      try {
+        console.log('Checking settings endpoint:', settingsEndpoint);
+        const startTime = Date.now();
+        const timeout = 15000; // 15 seconds timeout
+        
+        while (Date.now() - startTime < timeout) {
+          try {
+            const response = await fetch(settingsEndpoint, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+              },
+            });
+        
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Settings endpoint is available and returned:', data);
+              break;
+            }
+          } catch (error) {
+            // Ignore errors and continue trying
+          }
+          
+          // Wait for 1 second before the next attempt
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        
+        if (Date.now() - startTime >= timeout) {
+          throw new Error('Settings endpoint check timed out after 15 seconds');
+        }
+      } catch (error) {
+        console.error('Error checking settings endpoint:', error);
+        core.setFailed(`Failed to check settings endpoint: ${error.message}`);
+      }
+      
 
       // Feed RepoChat with repo data
       const containerEndpointApi = 'https://' + containerEndpoint + '/api/ingest';
