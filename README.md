@@ -27,11 +27,11 @@ jobs:
       uses: flavienbwk/repochat-action@v0
       if: github.ref == 'refs/heads/main'
       with:
-        dirs_to_scan: "./example,README.md" # comma-separated glob dirs to analyze from this repo
-        openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-        openai_model_type_inference: "gpt-4o-mini"
-        openai_model_type_embedding : "text-embedding-3-small"
-        cloud_provider: 'scaleway'
+        dirs_to_scan: "./example,README.md"  # comma-separated glob dirs to analyze from this repo (required)
+        openai_api_key: ${{ secrets.OPENAI_API_KEY }}  # (required)
+        openai_model_type_inference: "gpt-4o-mini"  # (required)
+        openai_model_type_embedding : "text-embedding-3-small"  # (required)
+        cloud_provider: 'scaleway'  # (required)
         provider_key_id: ${{ secrets.PROVIDER_KEY_ID }}
         provider_key_secret: ${{ secrets.PROVIDER_KEY_SECRET }}
         provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
@@ -47,7 +47,7 @@ jobs:
 
 - **[Scaleway](https://www.scaleway.com/en/)**
   - Refer to [Scaleway's documentation to generate API keys](https://www.scaleway.com/en/docs/identity-and-access-management/iam/how-to/create-api-keys/).
-  - Required parameters:
+  - Additional required parameters:
     - `cloud_provider`: 'scaleway'
     - `provider_key_id`: ${{ secrets.PROVIDER_KEY_ID }}
     - `provider_key_secret`: ${{ secrets.PROVIDER_KEY_SECRET }}
