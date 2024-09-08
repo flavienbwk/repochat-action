@@ -16,7 +16,7 @@ async function sendFileToApi(filePath, apiUrl) {
   const payload = { 'content': content, 'metadata': metadata };
 
   try {
-    console.log(`Sending: ${filePath} to ${apiUrl}`);
+    console.log(`Sending: ${filePath}`);
     const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
     return response;
   } catch (error) {
@@ -262,7 +262,7 @@ try {
         
             if (response.ok) {
               const data = await response.json();
-              console.log('Settings endpoint is available and returned:', data);
+              console.log('Settings endpoint is available. Ready to ingest.');
               break;
             }
           } catch (error) {
