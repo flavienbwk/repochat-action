@@ -3,41 +3,37 @@
 import { useState, useRef, useEffect } from 'react';
 import { sendMessage } from './Api';
 import ReactMarkdown from 'react-markdown';
-
-import './globals.css';
+import useChat from './hooks/useChat';
 
 export default function Chat({ token, setShowPasswordModal }) {
-    const [messages, setMessages] = useState([]);
+    const { messages, addMessage, isLoading, setIsLoading } = useChat();
     const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const scrollToBottom = () => {
+    useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(scrollToBottom, [messages]);
+    }, [messages]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
 
-        setMessages([...messages, { text: input, sender: 'user' }]);
+        addMessage({ text: input, sender: 'user' });
         setInput('');
         setIsLoading(true);
 
         try {
             const response = await sendMessage({ "prompt": input }, token);
-            setIsLoading(false);
-            setMessages((prevMessages) => [...prevMessages, { text: response.result, sender: 'bot', sources: response.sources }]);
+            addMessage({ text: response.result, sender: 'bot', sources: response.sources });
         } catch (error) {
-            setIsLoading(false);
             if (error.message === 'Unauthorized') {
                 localStorage.removeItem('chatToken');
                 setShowPasswordModal(true);
             } else {
-                setMessages((prevMessages) => [...prevMessages, { text: "An error occurred. Please try again.", sender: 'bot' }]);
+                addMessage({ text: "An error occurred. Please try again.", sender: 'bot' });
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -45,33 +41,9 @@ export default function Chat({ token, setShowPasswordModal }) {
         <div className="chat-container">
             <div className="chat-messages">
                 {messages.map((message, index) => (
-                    <div key={index} className={`message ${message.sender}`}>
-                        {message.sender === 'user' ? (
-                            message.text
-                        ) : (
-                            <>
-                                <ReactMarkdown>{message.text}</ReactMarkdown>
-                                {message.sources && (
-                                    <div className="sources">
-                                        <h4>Sources:</h4>
-                                        <ul>
-                                            {message.sources.map((source, idx) => (
-                                                <li key={idx}>- {source}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
+                    <Message key={index} message={message} />
                 ))}
-                {isLoading && (
-                    <div className="message bot skeleton">
-                        <div className="skeleton-line"></div>
-                        <div className="skeleton-line"></div>
-                        <div className="skeleton-line"></div>
-                    </div>
-                )}
+                {isLoading && <LoadingSkeleton />}
                 <div ref={messagesEndRef} />
             </div>
             <form onSubmit={handleSubmit} className="input-container">
@@ -86,3 +58,35 @@ export default function Chat({ token, setShowPasswordModal }) {
         </div>
     );
 }
+
+const Message = ({ message }) => (
+    <div className={`message ${message.sender}`}>
+        {message.sender === 'user' ? (
+            message.text
+        ) : (
+            <>
+                <ReactMarkdown>{message.text}</ReactMarkdown>
+                {message.sources && <Sources sources={message.sources} />}
+            </>
+        )}
+    </div>
+);
+
+const Sources = ({ sources }) => (
+    <div className="sources">
+        <h4>Sources:</h4>
+        <ul>
+            {sources.map((source, idx) => (
+                <li key={idx}>- {source}</li>
+            ))}
+        </ul>
+    </div>
+);
+
+const LoadingSkeleton = () => (
+    <div className="message bot skeleton">
+        <div className="skeleton-line"></div>
+        <div className="skeleton-line"></div>
+        <div className="skeleton-line"></div>
+    </div>
+);

@@ -1,5 +1,3 @@
-import os
-import shutil
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate

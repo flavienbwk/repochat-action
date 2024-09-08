@@ -3,16 +3,17 @@ import base64
 import binascii
 import shutil
 import logging
+from datetime import datetime, timedelta
+from typing import Dict
+
 from fastapi import FastAPI, HTTPException, Header, Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from jose import JWTError, jwt
+
 from api.dir_loader import DirLoader
 from api.api_loader import APILoader
-from fastapi.middleware.cors import CORSMiddleware
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
 from api.config import (
     CLEAR_DB_AT_RESTART,
     MODEL_TYPE_INFERENCE,
@@ -26,11 +27,15 @@ from api.config import (
     MODE,
 )
 
+# Constants
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
+# FastAPI security
 security = HTTPBearer(auto_error=False)
 
 
+# Pydantic models
 class Query(BaseModel):
     prompt: str
 
@@ -41,26 +46,28 @@ class ValidatePassword(BaseModel):
 
 class IngestData(BaseModel):
     content: str
-    metadata: dict
+    metadata: Dict
 
 
-def create_access_token(data: dict):
+# JWT functions
+def create_access_token(data: Dict) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, INTERFACE_PASSWORD, algorithm="HS256")
-    return encoded_jwt
+    return jwt.encode(to_encode, INTERFACE_PASSWORD, algorithm="HS256")
 
 
-def verify_token(token: str):
+def verify_token(token: str) -> Dict | None:
     try:
-        payload = jwt.decode(token, INTERFACE_PASSWORD, algorithms=["HS256"])
-        return payload
+        return jwt.decode(token, INTERFACE_PASSWORD, algorithms=["HS256"])
     except JWTError:
         return None
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+# Authentication dependencies
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> Dict:
     token = credentials.credentials
     payload = verify_token(token)
     if payload is None:
@@ -68,22 +75,27 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     return payload
 
 
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+) -> Dict:
+    if not INTERFACE_PASSWORD:
+        return {"sub": "anonymous"}
+    if credentials:
+        token = credentials.credentials
+        payload = verify_token(token)
+        if payload:
+            return payload
+    raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+# Model initialization
 def get_model():
     if CLEAR_DB_AT_RESTART:
-        if os.path.exists(PERSIST_DIRECTORY):
-            try:
-                shutil.rmtree(PERSIST_DIRECTORY)
-                logging.info(f"Cleared DB at {PERSIST_DIRECTORY}")
-            except Exception as e:
-                logging.warning(f"Error clearing DB: {e}")
-        else:
-            logging.info(
-                f"DB directory {PERSIST_DIRECTORY} does not exist. No need to clear."
-            )
+        clear_database()
 
     if MODE == "directory":
-        if REPO_PATH == "":
-            raise Exception("Repo path is required for directory mode")
+        if not REPO_PATH:
+            raise ValueError("Repo path is required for directory mode")
         return DirLoader(
             repo_path=REPO_PATH,
             force_reingest=CLEAR_DB_AT_RESTART,
@@ -97,13 +109,28 @@ def get_model():
             model_type_embedding=MODEL_TYPE_EMBEDDING,
             persist_directory=PERSIST_DIRECTORY,
         )
-    raise Exception(f"Invalid ingestion mode {MODE}")
+    else:
+        raise ValueError(f"Invalid ingestion mode {MODE}")
 
 
+def clear_database():
+    if os.path.exists(PERSIST_DIRECTORY):
+        try:
+            shutil.rmtree(PERSIST_DIRECTORY)
+            logging.info(f"Cleared DB at {PERSIST_DIRECTORY}")
+        except Exception as e:
+            logging.warning(f"Error clearing DB: {e}")
+    else:
+        logging.info(
+            f"DB directory {PERSIST_DIRECTORY} does not exist. No need to clear."
+        )
+
+
+# FastAPI app initialization
 app = FastAPI(title=f"Repo {REPO_NAME}")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -111,6 +138,7 @@ app.add_middleware(
 model = get_model()
 
 
+# API routes
 @app.get("/")
 async def root():
     return {"message": "alive"}
@@ -123,7 +151,7 @@ async def settings():
         "repo_url": REPO_URL,
         "message": f"Welcome to the {REPO_NAME} chatbot API. Use the /query endpoint to ask questions.",
         "warning_message": "This search engine may produce inaccurate explanations (called hallucinations), please verify the sources.",
-        "interface_password_enabled": True if INTERFACE_PASSWORD else False,
+        "interface_password_enabled": bool(INTERFACE_PASSWORD),
     }
 
 
@@ -136,25 +164,14 @@ async def validate(data: ValidatePassword):
 
 
 @app.get("/api/check")
-async def check(current_user: dict = Depends(get_current_user)):
+async def check(current_user: Dict = Depends(get_current_user)):
     return {"message": "Token is valid", "user": current_user}
 
 
-def get_optional_current_user(
-    credentials: HTTPAuthorizationCredentials = Security(security),
-):
-    if not INTERFACE_PASSWORD:
-        return {"sub": "anonymous"}
-    if credentials:
-        token = credentials.credentials
-        payload = verify_token(token)
-        if payload:
-            return payload
-    raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-
 @app.post("/api/query")
-async def query(query: Query, current_user: dict = Depends(get_optional_current_user)):
+async def query(
+    query: Query, current_user: Dict = Depends(get_optional_current_user)
+) -> Dict[str, str | list]:
     try:
         result, sources = model.retrieval_qa_inference(query.prompt, verbose=False)
         return {"result": result, "sources": sources}
