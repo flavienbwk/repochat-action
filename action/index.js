@@ -197,8 +197,11 @@ try {
         container = await containerApi.createContainer(containerConfig);
         console.log('Container created:', container.id);
       } catch (error) {
-        console.log(error)
         if (error.status && error.status === 409) {
+          if (error.body.message == "Namespace is in a blocking state") {
+            console.log('Waiting for 30 seconds to allow registries to get a valid state...');
+            await new Promise(resolve => setTimeout(resolve, 30000));
+          }
           console.log('Container already exists, retrieving existing container');
           const containers = await containerApi.listContainers({ namespaceId: namespace.id });
           container = containers.containers.find(c => c.name === containerName);
