@@ -24,9 +24,22 @@ async function sendFileToApi(filePath, apiUrl) {
   }
 }
 
-async function ingestFiles(directoryPath, apiUrl) {
-  if (!fs.existsSync(directoryPath) || !fs.statSync(directoryPath).isDirectory()) {
-    console.error(`Error: ${directoryPath} is not a valid directory.`);
+async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
+  if (!fs.existsSync(directoryPath)) {
+    console.error(`Error: ${directoryPath} does not exist.`);
+    return;
+  }
+
+  const stats = fs.statSync(directoryPath);
+  if (stats.isFile()) {
+    if (isValidFile(directoryPath) && !isExcluded(directoryPath, excludeFiles)) {
+      await processFile(directoryPath, apiUrl);
+    }
+    return;
+  }
+
+  if (!stats.isDirectory()) {
+    console.error(`Error: ${directoryPath} is not a valid directory or file.`);
     return;
   }
 
@@ -35,18 +48,29 @@ async function ingestFiles(directoryPath, apiUrl) {
   for (const file of files) {
     const filePath = path.join(directoryPath, file.name);
     if (file.isDirectory()) {
-      await ingestFiles(filePath, apiUrl);
-    } else if (isValidFile(filePath)) {
-      console.log(`Sending file: ${filePath}`);
-      const response = await sendFileToApi(filePath, apiUrl);
-      if (response.status === 200) {
-        console.log(`Successfully ingested: ${filePath}`);
-      } else {
-        console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
-      }
+      await ingestFiles(filePath, apiUrl, excludeFiles);
+    } else if (isValidFile(filePath) && !isExcluded(filePath, excludeFiles)) {
+      await processFile(filePath, apiUrl);
     } else {
-      console.log(`Skipping invalid or hidden file: ${filePath}`);
+      console.log(`Skipping invalid, hidden, or excluded file: ${filePath}`);
     }
+  }
+}
+
+function isExcluded(filePath, excludeFiles) {
+  return excludeFiles.some(pattern => {
+    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
+    return regex.test(filePath);
+  });
+}
+
+async function processFile(filePath, apiUrl) {
+  console.log(`Sending file: ${filePath}`);
+  const response = await sendFileToApi(filePath, apiUrl);
+  if (response.status === 200) {
+    console.log(`Successfully ingested: ${filePath}`);
+  } else {
+    console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
   }
 }
 
@@ -169,7 +193,7 @@ try {
           const containers = await containerApi.listContainers({ namespaceId: namespace.id });
           container = containers.containers.find(c => c.name === containerName);
           console.log('Retrieved existing container:', container.id);
-          
+
           // Update the existing container with new configuration
           container = await containerApi.updateContainer({
             containerId: container.id,
@@ -222,16 +246,20 @@ try {
       // Feed RepoChat with repo data
       const containerEndpointApi = 'https://' + containerEndpoint + '/api/ingest';
       console.log(`Ingesting files at ${containerEndpointApi}...`);
-      ingestFiles('./', containerEndpointApi);
-  
+      const dirsToScanArray = dirsToScan.split(',').map(dir => dir.trim());
+      for (const dir of dirsToScanArray) {
+        console.log(`Ingesting files inside ${dir}...`);
+        ingestFiles(dir, containerEndpointApi, ['node_modules', '.git', 'package-lock.json']);
+      }
+
       // Set outputs
       core.setOutput('domain', containerEndpoint);
     } catch (error) {
       console.error('Error deploying container:', error);
     }
-    
+
   }
-  
+
 } catch (error) {
   core.setFailed(error.message);
 }
