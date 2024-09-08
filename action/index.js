@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
-import { Container, createClient, Secret } from '@scaleway/sdk';
+import { Container, createClient } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
@@ -57,7 +57,7 @@ async function ingestFiles(directoryPath, apiUrl, ingestSecret, excludeFiles = [
   const stats = fs.statSync(directoryPath);
   if (stats.isFile()) {
     if (isValidFile(directoryPath) && !isExcluded(directoryPath, excludeFiles)) {
-      await processFile(directoryPath, apiUrl);
+      await processFile(directoryPath, apiUrl, ingestSecret);
     }
     return;
   }
