@@ -169,6 +169,25 @@ try {
       }
     }
 
+    // Wait for namespace to be ready
+    const startTime = Date.now();
+    const timeout = 60000; // 60 seconds in milliseconds
+    while (namespace.status === 'pending') {
+      console.log('Waiting for namespace to be ready...');
+      if (Date.now() - startTime > timeout) {
+        core.setFailed('Namespace creation timed out after 60 seconds');
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+      const updatedNamespaces = await containerApi.listNamespaces();
+      namespace = updatedNamespaces.namespaces.find(ns => ns.id === namespace.id);
+    }
+    if (namespace.status !== 'ready') {
+      core.setFailed(`Namespace creation failed. Status: ${namespace.status}`);
+    }
+    console.log('Namespace is ready');
+    
+
     const containerConfig = {
       name: containerName,
       namespaceId: namespace.id,
@@ -282,7 +301,7 @@ try {
         }
         
         if (Date.now() - startTime >= timeout) {
-          throw new Error('Settings endpoint check timed out after 15 seconds');
+          core.setFailed('Settings endpoint check timed out after 15 seconds');
         }
       } catch (error) {
         console.error('Error checking settings endpoint:', error);
