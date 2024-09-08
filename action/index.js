@@ -199,13 +199,15 @@ try {
       maxScale: 1,
       description: 'Repochat Action repochat',
       environmentVariables: {
-        OPENAI_API_KEY: openaiApiKey,
         MODEL_TYPE_INFERENCE: openaiModelTypeInference,
         MODEL_TYPE_EMBEDDING: openaiModelTypeEmbedding,
-        INGEST_SECRET: ingestSecret,
         REPO_NAME: process.env.GITHUB_REPOSITORY,
         REPO_URL: `https://github.com/${process.env.GITHUB_REPOSITORY}`,
         MODE: 'api'
+      },
+      secretEnvironmentVariables: {
+        OPENAI_API_KEY: openaiApiKey,
+        INGEST_SECRET: ingestSecret
       }
     };
 
