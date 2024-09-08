@@ -25,6 +25,23 @@ async function sendFileToApi(filePath, apiUrl) {
   }
 }
 
+function isExcluded(filePath, excludeFiles) {
+  return excludeFiles.some(pattern => {
+    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
+    return regex.test(filePath);
+  });
+}
+
+async function processFile(filePath, apiUrl) {
+  console.log(`Sending file: ${filePath}`);
+  const response = await sendFileToApi(filePath, apiUrl);
+  if (response.status === 200) {
+    console.log(`Successfully ingested: ${filePath}`);
+  } else {
+    console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
+  }
+}
+
 async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
   if (!fs.existsSync(directoryPath)) {
     console.error(`Error: ${directoryPath} does not exist.`);
@@ -55,23 +72,6 @@ async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
     } else {
       console.log(`Skipping invalid, hidden, or excluded file: ${filePath}`);
     }
-  }
-}
-
-function isExcluded(filePath, excludeFiles) {
-  return excludeFiles.some(pattern => {
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
-    return regex.test(filePath);
-  });
-}
-
-async function processFile(filePath, apiUrl) {
-  console.log(`Sending file: ${filePath}`);
-  const response = await sendFileToApi(filePath, apiUrl);
-  if (response.status === 200) {
-    console.log(`Successfully ingested: ${filePath}`);
-  } else {
-    console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
   }
 }
 
