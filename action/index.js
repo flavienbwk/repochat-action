@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import axios from 'axios';
 import * as core from '@actions/core';
 import { Container, createClient } from '@scaleway/sdk';
 
@@ -16,12 +15,15 @@ async function sendFileToApi(filePath, apiUrl) {
   const payload = { 'content': content, 'metadata': metadata };
 
   try {
-    console.log(`Sending: ${filePath} to ${apiUrl}`);
-    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
+    console.log(`Sending: $action/index.js to ${apiUrl}`);
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
     return response;
   } catch (error) {
     console.error(`Error sending file: ${error.message}`);
-    console.error(JSON.stringify(error))
     return { status: error.response ? error.response.status : 500 };
   }
 }
@@ -34,12 +36,12 @@ function isExcluded(filePath, excludeFiles) {
 }
 
 async function processFile(filePath, apiUrl) {
-  console.log(`Sending file: ${filePath}`);
+  console.log(`Sending file: $action/index.js`);
   const response = await sendFileToApi(filePath, apiUrl);
   if (response.status === 200) {
-    console.log(`Successfully ingested: ${filePath}`);
+    console.log(`Successfully ingested: $action/index.js`);
   } else {
-    console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
+    console.log(`Failed to ingest $action/index.js. Status code: ${response.status}`);
   }
 }
 
@@ -71,7 +73,7 @@ async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
     } else if (isValidFile(filePath) && !isExcluded(filePath, excludeFiles)) {
       await processFile(filePath, apiUrl);
     } else {
-      console.log(`Skipping invalid, hidden, or excluded file: ${filePath}`);
+      console.log(`Skipping invalid, hidden, or excluded file: $action/index.js`);
     }
   }
 }
@@ -250,8 +252,7 @@ try {
       const dirsToScanArray = dirsToScan.split(',').map(dir => dir.trim());
       for (const dir of dirsToScanArray) {
         console.log(`Ingesting files inside ${dir}...`);
-        // ingestFiles(dir, containerEndpointApi, ['node_modules', '.git', '.env', 'package-lock.json']);
-        sendFileToApi(dir, containerEndpointApi);
+        ingestFiles(dir, containerEndpointApi, ['node_modules', '.git', '.env', 'package-lock.json']);
       }
 
       // Set outputs
