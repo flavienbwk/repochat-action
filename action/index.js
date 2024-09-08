@@ -156,14 +156,13 @@ try {
         name: containerNamespace,
         description: 'Namespace for GitHub Action',
       });
-      console.log('Namespace created:', namespace.id);
+      console.log('Namespace created:', namespace);
     } catch (error) {
       if (error.status && error.status === 409) {
         console.log('Namespace already exists, retrieving existing namespace');
         const namespaces = await containerApi.listNamespaces();
         namespace = namespaces.namespaces.find(ns => ns.name === containerNamespace);
-        console.log('Retrieved existing namespace:', namespace);
-        
+        console.log('Retrieved existing namespace:', namespace.id);
       } else {
         console.error('Error creating/retrieving namespace:', error);
         core.setFailed(error.message);
