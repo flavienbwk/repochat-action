@@ -206,8 +206,8 @@ try {
         MODE: 'api'
       },
       secretEnvironmentVariables: [
-        new Container.v1beta1.Secret('OPENAI_API_KEY', openaiApiKey),
-        new Container.v1beta1.Secret('INGEST_SECRET', parIngestSecret)
+        Container.v1beta1.Secret('OPENAI_API_KEY', openaiApiKey),
+        Container.v1beta1.Secret('INGEST_SECRET', parIngestSecret)
       ]
     };
 
