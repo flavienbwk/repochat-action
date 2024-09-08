@@ -92,7 +92,7 @@ try {
   const providerProjectId = core.getInput('provider_project_id');
   const providerDefaultRegion = core.getInput('provider_default_region');
   const providerDefaultZone = core.getInput('provider_default_zone');
-  const ingestSecret = uuidv4();
+  const parIngestSecret = uuidv4();
 
   // Check required parameters
   if (!dirsToScan) {
@@ -207,7 +207,7 @@ try {
       },
       secretEnvironmentVariables: {
         OPENAI_API_KEY: openaiApiKey,
-        INGEST_SECRET: ingestSecret
+        INGEST_SECRET: parIngestSecret
       }
     };
 
@@ -316,7 +316,7 @@ try {
       const dirsToScanArray = dirsToScan.split(',').map(dir => dir.trim());
       for (const dir of dirsToScanArray) {
         console.log(`Ingesting files inside ${dir}...`);
-        ingestFiles(dir, containerEndpointApi, ingestSecret, ['node_modules', '.git', '.env', 'package-lock.json']);
+        ingestFiles(dir, containerEndpointApi, parIngestSecret, ['node_modules', '.git', '.env', 'package-lock.json']);
       }
 
       // Set outputs
