@@ -16,7 +16,7 @@ async function sendFileToApi(filePath, apiUrl) {
   const payload = { 'content': content, 'metadata': metadata };
 
   try {
-    const response = await axios.post(apiUrl, payload);
+    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
     return response;
   } catch (error) {
     console.error(`Error sending file: ${error.message}`);

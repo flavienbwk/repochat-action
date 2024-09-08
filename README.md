@@ -124,6 +124,13 @@ make dev
 
     This will create a release based on `package.json` and push the `:latest` Docker image.
 
+## Features
+
+- [x] Directory data chat
+- [x] API data chat
+- [x] GitHub Actions release
+- [ ] Secure ingestion endpoint (/api/ingest)
+
 ## Why not use Vercel ?
 
 Vercel is very limited when deploying everything but JS. First, ChromaDB (and any sqlite-based library) [is not supported in Vercel](https://vercel.community/t/is-vercel-incompatible-with-chromadb-sqlite/787). Then, this project uses a FastAPI Python API that requires more storage than [Vercel's 250MB bundle limit](https://vercel.com/docs/functions/runtimes#bundle-size-limits).
