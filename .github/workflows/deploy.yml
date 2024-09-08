@@ -31,9 +31,9 @@ jobs:
               run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT
               id: repochat_domain
 
-            - name: Set repo URL
+            - name: Set repo's website URL
               run: |
-                REPO_URL="https://github.com/${{ github.repository }}"
-                curl -X POST "$DOMAIN/api/set-repo-url" \
-                    -H "Content-Type: application/json" \
-                    -d "{\"repoUrl\": \"$REPO_URL\"}"
+                gh repo edit ${{ github.repository }} --homepage "https://$DOMAIN"
+              env:
+                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              
