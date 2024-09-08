@@ -244,7 +244,7 @@ try {
       }
 
       // Feed RepoChat with repo data
-      const containerEndpointApi = 'https://' + containerEndpoint + '/api/ingest';
+      const containerEndpointApi = 'https://' + containerEndpoint;
       console.log(`Ingesting files or directory: ${containerEndpointApi}...`);
       const dirsToScanArray = dirsToScan.split(',').map(dir => dir.trim());
       for (const dir of dirsToScanArray) {
