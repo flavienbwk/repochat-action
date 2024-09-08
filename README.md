@@ -1,5 +1,9 @@
 # Repochat Action
 
+[![Deployment CI](https://github.com/flavienbwk/repochat-action/actions/workflows/deploy.yml/badge.svg)](https://github.com/flavienbwk/repochat-action/actions/workflows/deploy.yml)
+[![GitHub release](https://img.shields.io/github/v/release/flavienbwk/repochat-action)](https://github.com/flavienbwk/repochat-action/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > [!CAUTION]
 > This project is currently NOT ready.
 > This project is in early development and may contain bugs or incomplete features. Use with caution in production environments.

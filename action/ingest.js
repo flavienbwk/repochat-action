@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const axios = require('axios');
+import fs from 'fs';
+import path from 'path';
+import axios from 'axios';
 
 function isValidFile(filePath) {
   return fs.statSync(filePath).isFile() && !path.basename(filePath).startsWith('.');
