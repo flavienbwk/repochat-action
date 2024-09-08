@@ -53,6 +53,8 @@ jobs:
       id: repochat_domain
 ```
 
+Get a practical implementation example with [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml).
+
 ### Supported Cloud providers
 
 - **[Scaleway](https://www.scaleway.com/en/)**
