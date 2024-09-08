@@ -1,6 +1,8 @@
 import * as core from '@actions/core';
 import { Container, createClient } from '@scaleway/sdk';
 
+import { ingestFiles } from './ingest'
+
 const providers = ['scaleway'];
 
 try {
@@ -173,7 +175,9 @@ try {
       }
 
       // Feed RepoChat with repo data
-      // TODO(flavienbwk): !!
+      const containerEndpointApi = 'https://' + containerEndpoint + '/api/ingest';
+      console.log(`Ingesting files at ${containerEndpointApi}...`);
+      ingestFiles('./', containerEndpointApi);
   
       // Set outputs
       core.setOutput('domain', containerEndpoint);
