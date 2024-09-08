@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
-import { Container, createClient } from '@scaleway/sdk';
+import { Container, createClient, Secret } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
@@ -188,6 +188,14 @@ try {
     console.log('Namespace is ready');
     
 
+    const openaiApiKeySecret = Secret({
+      key: 'OPENAI_API_KEY',
+      value: openaiApiKey
+    })
+    const parIngestSecretSecret = Secret({
+      key: 'INGEST_SECRET',
+      value: parIngestSecret
+    })
     const containerConfig = {
       name: containerName,
       namespaceId: namespace.id,
@@ -206,8 +214,8 @@ try {
         MODE: 'api'
       },
       secretEnvironmentVariables: [
-        Container.v1beta1.Secret('OPENAI_API_KEY', openaiApiKey),
-        Container.v1beta1.Secret('INGEST_SECRET', parIngestSecret)
+        openaiApiKeySecret,
+        parIngestSecretSecret
       ]
     };
 
