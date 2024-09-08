@@ -38,7 +38,7 @@ function isExcluded(filePath, excludeFiles) {
   });
 }
 
-async function processFile(filePath, apiUrl) {
+async function processFile(filePath, apiUrl, ingestSecret) {
   console.log(`Sending file: ${filePath}`);
   const response = await sendFileToApi(filePath, apiUrl, ingestSecret);
   if (response.status === 200) {
@@ -48,7 +48,7 @@ async function processFile(filePath, apiUrl) {
   }
 }
 
-async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
+async function ingestFiles(directoryPath, apiUrl, ingestSecret, excludeFiles = []) {
   if (!fs.existsSync(directoryPath)) {
     console.error(`Error: ${directoryPath} does not exist.`);
     return;
@@ -72,9 +72,9 @@ async function ingestFiles(directoryPath, apiUrl, excludeFiles = []) {
   for (const file of files) {
     const filePath = path.join(directoryPath, file.name);
     if (file.isDirectory()) {
-      await ingestFiles(filePath, apiUrl, excludeFiles);
+      await ingestFiles(filePath, apiUrl, ingestSecret, excludeFiles);
     } else if (isValidFile(filePath) && !isExcluded(filePath, excludeFiles)) {
-      await processFile(filePath, apiUrl);
+      await processFile(filePath, apiUrl, ingestSecret);
     } else {
       console.log(`Skipping invalid, hidden, or excluded file: ${filePath}`);
     }
@@ -173,7 +173,7 @@ try {
     const startTime = Date.now();
     const timeout = 60000; // 60 seconds in milliseconds
     while (namespace.status === 'pending') {
-      console.log('Waiting for namespace to be ready...');
+      console.log(`Waiting for namespace to be ready... ${namespace.status}`);
       if (Date.now() - startTime > timeout) {
         core.setFailed('Namespace creation timed out after 60 seconds');
         break;
@@ -314,7 +314,7 @@ try {
       const dirsToScanArray = dirsToScan.split(',').map(dir => dir.trim());
       for (const dir of dirsToScanArray) {
         console.log(`Ingesting files inside ${dir}...`);
-        ingestFiles(dir, containerEndpointApi, ['node_modules', '.git', '.env', 'package-lock.json']);
+        ingestFiles(dir, containerEndpointApi, ingestSecret, ['node_modules', '.git', '.env', 'package-lock.json']);
       }
 
       // Set outputs
