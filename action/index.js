@@ -17,7 +17,7 @@ async function sendFileToApi(filePath, apiUrl) {
 
   try {
     console.log(`Sending: ${filePath} to ${apiUrl}`);
-    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
+    const response = await axios.post("https://ghactionrepochatactiaw4fekyi-gh-action-repochat-action.functions.fnc.fr-par.scw.cloud/api/ingest", payload, { headers: { 'Content-Type': 'application/json' } });
     return response;
   } catch (error) {
     console.error(`Error sending file: ${error.message}`);
