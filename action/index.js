@@ -186,16 +186,10 @@ try {
       core.setFailed(`Namespace creation failed. Status: ${namespace.status}`);
     }
     console.log('Namespace is ready');
-    
 
-    const openaiApiKeySecret = Secret({
-      key: 'OPENAI_API_KEY',
-      value: openaiApiKey
-    })
-    const parIngestSecretSecret = Secret({
-      key: 'INGEST_SECRET',
-      value: parIngestSecret
-    })
+
+    const openaiApiKeySecret = { key: 'OPENAI_API_KEY', value: openaiApiKey }
+    const parIngestSecretSecret = { key: 'INGEST_SECRET', value: parIngestSecret }
     const containerConfig = {
       name: containerName,
       namespaceId: namespace.id,
@@ -287,7 +281,7 @@ try {
         console.log('Checking settings endpoint...');
         const startTime = Date.now();
         const timeout = 30000; // 30 seconds timeout
-        
+
         while (Date.now() - startTime < timeout) {
           try {
             const response = await fetch(settingsEndpoint, {
@@ -296,7 +290,7 @@ try {
                 'Accept': 'application/json',
               },
             });
-        
+
             if (response.ok) {
               const data = await response.json();
               console.log('Settings endpoint is available. Ready to ingest.');
@@ -305,11 +299,11 @@ try {
           } catch (error) {
             // Ignore errors and continue trying
           }
-          
+
           // Wait for 1 second before the next attempt
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        
+
         if (Date.now() - startTime >= timeout) {
           core.setFailed('Settings endpoint check timed out after 15 seconds');
         }
@@ -317,7 +311,7 @@ try {
         console.error('Error checking settings endpoint:', error);
         core.setFailed(`Failed to check settings endpoint: ${error.message}`);
       }
-      
+
 
       // Feed RepoChat with repo data
       const containerEndpointApi = 'https://' + containerEndpoint + '/api/ingest';
