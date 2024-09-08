@@ -162,7 +162,8 @@ try {
         console.log('Namespace already exists, retrieving existing namespace');
         const namespaces = await containerApi.listNamespaces();
         namespace = namespaces.namespaces.find(ns => ns.name === containerNamespace);
-        console.log('Retrieved existing namespace:', namespace.id);
+        console.log('Retrieved existing namespace:', namespace);
+        
       } else {
         console.error('Error creating/retrieving namespace:', error);
         core.setFailed(error.message);
@@ -198,12 +199,6 @@ try {
         console.log('Container created:', container.id);
       } catch (error) {
         if (error.status && error.status === 409) {
-          if (error.body.message == "Namespace is in a blocking state") {
-            console.log('Waiting for 30 seconds to allow registries to get a valid state...');
-            console.log(await containerApi.listContainers({ namespaceId: namespace.id }))
-            await new Promise(resolve => setTimeout(resolve, 30000));
-            console.log(await containerApi.listContainers({ namespaceId: namespace.id }))
-          }
           console.log('Container already exists, retrieving existing container');
           const containers = await containerApi.listContainers({ namespaceId: namespace.id });
           container = containers.containers.find(c => c.name === containerName);
