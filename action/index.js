@@ -12,8 +12,8 @@ function isValidFile(filePath) {
 
 async function sendFileToApi(filePath, apiUrl) {
   const content = fs.readFileSync(filePath, { encoding: 'base64' });
-  const metadata = { source: path.basename(filePath) };
-  const payload = { content, metadata };
+  const metadata = { 'source': path.basename(filePath) };
+  const payload = { 'content': content, 'metadata': metadata };
 
   try {
     const response = await axios.post(apiUrl, payload);
