@@ -1,23 +1,49 @@
 "use client";
 
-import Chat from './Chat';
-import { getSettings } from './Api';
-
 import { useState, useEffect } from 'react';
+import Chat from './Chat';
+import PasswordModal from './PasswordModal';
+import { getSettings, checkToken } from './Api';
 
 export default function Home() {
   const [settings, setSettings] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [token, setToken] = useState('');
+  const [isTokenValid, setIsTokenValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSettings = async () => {
+      setIsLoading(true);
       const settings = await getSettings();
       setSettings(settings);
+
+      const savedToken = localStorage.getItem('chatToken');
+      if (savedToken && settings.interface_password_enabled) {
+        setToken(savedToken);
+        const isValid = await checkToken(savedToken);
+        setIsTokenValid(isValid);
+        setShowPasswordModal(!isValid);
+      } else if (settings.interface_password_enabled) {
+        setShowPasswordModal(true);
+      } else {
+        setShowPasswordModal(false);
+        console.log('Interface secret is not enabled.');
+      }
+      setIsLoading(false);
     };
     fetchSettings();
   }, []);
 
+  const handleValidate = (newToken) => {
+    setToken(newToken);
+    setShowPasswordModal(false);
+    setIsTokenValid(true);
+    localStorage.setItem('chatToken', newToken);
+  };
+
   return (
-    <html className="h-full">
+    <html suppressHydrationWarning className="h-full">
       <body className="h-full overflow-hidden">
         <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-between h-screen">
           <div className="w-full px-4 h-full flex items-center">
@@ -31,7 +57,11 @@ export default function Home() {
                     </h1>
                   )}
                   <h2 className="text-2xl font-bold mb-4 text-center text-gray-700">Repochat assistant</h2>
-                  <Chat />
+                  {(showPasswordModal) ? (
+                    <PasswordModal onValidate={handleValidate} isLoading={isLoading} />
+                  ) : (
+                    <Chat token={token} setShowPasswordModal={setShowPasswordModal} />
+                  )}
                 </div>
               </div>
             </div>

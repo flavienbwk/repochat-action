@@ -3,6 +3,7 @@ services:
   repochat:
     build: .
     environment:
+      MODE: directory
       REPO_NAME: ${REPO_NAME}
       REPO_URL: ${REPO_URL}
       REPO_PATH: ${REPO_PATH}
@@ -11,7 +12,7 @@ services:
       MODEL_TYPE_INFERENCE: ${MODEL_TYPE_INFERENCE}
       MODEL_TYPE_EMBEDDING: ${MODEL_TYPE_EMBEDDING}
       CLEAR_DB_AT_RESTART: ${CLEAR_DB_AT_RESTART}
-      MODE: directory
+      INTERFACE_PASSWORD: ${INTERFACE_PASSWORD}
     volumes:
       - ./api/example:/usr/app/api/example:ro  # for directory mode only
       # - chromadb:/usr/app/db/chroma:rw  # to persist DB across reboots if desired (uncomment volumes)

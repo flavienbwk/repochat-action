@@ -83,10 +83,11 @@ async function ingestFiles(directoryPath, apiUrl, ingestSecret, excludeFiles = [
 
 try {
   const dirsToScan = core.getInput('dirs_to_scan');
+  const interfacePassword = core.getInput('interface_password');
   const openaiApiKey = core.getInput('openai_api_key');
   const openaiModelTypeInference = core.getInput('openai_model_type_inference');
   const openaiModelTypeEmbedding = core.getInput('openai_model_type_embedding');
-  const cloudProvider = core.getInput('cloud_provider');
+  const cloudProvider = core.getInput('provider_name');
   const providerKeyId = core.getInput('provider_key_id');
   const providerKeySecret = core.getInput('provider_key_secret');
   const providerProjectId = core.getInput('provider_project_id');
@@ -188,8 +189,12 @@ try {
     console.log('Namespace is ready');
 
 
-    const openaiApiKeySecret = { key: 'OPENAI_API_KEY', value: openaiApiKey }
-    const parIngestSecretSecret = { key: 'INGEST_SECRET', value: parIngestSecret }
+    let listOfSecrets  = [];
+    listOfSecrets.push({ key: 'OPENAI_API_KEY', value: openaiApiKey })
+    listOfSecrets.push({ key: 'INGEST_SECRET', value: parIngestSecret })
+    if (interfacePassword) {
+      listOfSecrets.push({ key: 'INTERFACE_PASSWORD', value: interfacePassword })
+    }
     const containerConfig = {
       name: containerName,
       namespaceId: namespace.id,
@@ -207,10 +212,7 @@ try {
         REPO_URL: `https://github.com/${process.env.GITHUB_REPOSITORY}`,
         MODE: 'api'
       },
-      secretEnvironmentVariables: [
-        openaiApiKeySecret,
-        parIngestSecretSecret
-      ]
+      secretEnvironmentVariables: listOfSecrets
     };
 
     try {

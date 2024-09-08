@@ -4,13 +4,18 @@
 [![GitHub release](https://img.shields.io/github/v/release/flavienbwk/repochat-action)](https://github.com/flavienbwk/repochat-action/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> [!CAUTION]
-> This project is currently NOT ready.
-> This project is in early development and may contain bugs or incomplete features. Use with caution in production environments.
+> [!WARNING]
+> This project is in early development and may contain bugs. Use with caution in production environments.
 
-Chat with your repo in under 2 minutes using GitHub Actions on supported Cloud providers.
+Chat with your repo in under 2 minutes using GitHub Actions on [supported Cloud providers](#supported-cloud-providers).
 
-Repochat is a LLM chatbot with stateless data ingestion capabilities through its API.
+Features:
+
+- :sparkles: A nice web UI
+- :octocat: Available as a GitHub Action
+- :floppy_disk: Stateful ingestion mode ([directory mode](./dir.docker-compose.yml#L6))
+- :arrows_counterclockwise: Sateless ingestion via API ([api mode](./api.docker-compose.yml#L6))
+- :closed_lock_with_key: Optional password on web UI
 
 ## Requirements
 
@@ -19,26 +24,29 @@ Repochat is a LLM chatbot with stateless data ingestion capabilities through its
 
 ## Usage for GitHub Actions
 
+Easily add RepoChat to your project using GitHub Actions:
+
 ```yaml
 jobs:
     steps:
     - name: Deploy a convenient chatbot for your repo
       id: deploy_repochat
       uses: flavienbwk/repochat-action@v0
-      if: github.ref == 'refs/heads/main'
       with:
-        dirs_to_scan: "./example,README.md"  # comma-separated glob dirs to analyze from this repo (required)
-        openai_api_key: ${{ secrets.OPENAI_API_KEY }}  # (required)
-        openai_model_type_inference: "gpt-4o-mini"  # (required)
-        openai_model_type_embedding : "text-embedding-3-small"  # (required)
-        cloud_provider: 'scaleway'  # (required)
+        # All parameters not explicitly marked as "optional" are required
+        dirs_to_scan: "./example,README.md"  # comma-separated glob dirs to analyze
+        interface_password: ${{ secrets.INTERFACE_PASSWORD }}  # optional
+        openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+        openai_model_type_inference: "gpt-4o-mini"
+        openai_model_type_embedding : "text-embedding-3-small"
+        provider_name: 'scaleway'
         provider_key_id: ${{ secrets.PROVIDER_KEY_ID }}
         provider_key_secret: ${{ secrets.PROVIDER_KEY_SECRET }}
         provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
         provider_default_region: 'fr-par'
         provider_default_zone: 'fr-par-2'
 
-    - name: Get container domain from precedent step
+    - name: Get RepoChat domain
       run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT
       id: repochat_domain
 ```
@@ -48,12 +56,15 @@ jobs:
 - **[Scaleway](https://www.scaleway.com/en/)**
   - Refer to [Scaleway's documentation to generate API keys](https://www.scaleway.com/en/docs/identity-and-access-management/iam/how-to/create-api-keys/).
   - Additional required parameters:
-    - `cloud_provider`: 'scaleway'
-    - `provider_key_id`: ${{ secrets.PROVIDER_KEY_ID }}
-    - `provider_key_secret`: ${{ secrets.PROVIDER_KEY_SECRET }}
-    - `provider_project_id`: ${{ secrets.PROVIDER_PROJECT_ID }}
-    - `provider_default_region`: 'fr-par'  # example
-    - `provider_default_zone`: 'fr-par-2'  # example
+
+    ```txt
+    provider_name: 'scaleway'
+    provider_key_id: ${{ secrets.PROVIDER_KEY_ID }}
+    provider_key_secret: ${{ secrets.PROVIDER_KEY_SECRET }}
+    provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
+    provider_default_region: 'fr-par'  # example
+    provider_default_zone: 'fr-par-2'  # example
+    ```
 
 ## Other deployments
 
@@ -105,9 +116,28 @@ jobs:
 
 ## Development
 
-```bash
-make dev
-```
+<details>
+<summary>👉 Run RepoChat for development...</summary>
+
+1. Clone this repo
+
+    ```bash
+    git@github.com:flavienbwk/repochat-action.git
+    ```
+
+2. Copy and update env variables
+
+    ```bash
+    cp .env.example .env
+    ```
+
+3. Run the local stack
+
+    ```bash
+    make dev
+    ```
+
+</details>
 
 ## Release Action
 
@@ -130,8 +160,9 @@ make dev
 - [x] API data chat
 - [x] GitHub Actions release
 - [x] Secure ingestion endpoint (/api/ingest)
-- [ ] Secure RepoChat with optional password
+- [x] Secure RepoChat with optional password
+- [ ] Maintain state over S3
 
 ## Why not use Vercel ?
 
-Vercel is very limited when deploying everything but JS. First, ChromaDB (and any sqlite-based library) [is not supported in Vercel](https://vercel.community/t/is-vercel-incompatible-with-chromadb-sqlite/787). Then, this project uses a FastAPI Python API that requires more storage than [Vercel's 250MB bundle limit](https://vercel.com/docs/functions/runtimes#bundle-size-limits).
+Vercel is very limited when it comes to deploying everything but JS. First, ChromaDB (and any sqlite-based library) [is not supported in Vercel](https://vercel.community/t/is-vercel-incompatible-with-chromadb-sqlite/787). Then, this project uses a FastAPI Python API that requires more storage than [Vercel's 250MB bundle limit](https://vercel.com/docs/functions/runtimes#bundle-size-limits).

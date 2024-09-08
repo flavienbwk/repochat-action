@@ -3,6 +3,7 @@ services:
   repochat:
     build: .
     environment:
+      MODE: api
       REPO_NAME: ${REPO_NAME}
       REPO_URL: ${REPO_URL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
@@ -10,6 +11,6 @@ services:
       MODEL_TYPE_INFERENCE: ${MODEL_TYPE_INFERENCE}
       MODEL_TYPE_EMBEDDING: ${MODEL_TYPE_EMBEDDING}
       CLEAR_DB_AT_RESTART: ${CLEAR_DB_AT_RESTART}
-      MODE: api
+      INTERFACE_PASSWORD: ${INTERFACE_PASSWORD}
     ports:
       - "3001:80"

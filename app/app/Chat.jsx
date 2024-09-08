@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 
 import './globals.css';
 
-export default function Chat() {
+export default function Chat({ token, setShowPasswordModal }) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -21,14 +21,24 @@ export default function Chat() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
-        
+
         setMessages([...messages, { text: input, sender: 'user' }]);
         setInput('');
         setIsLoading(true);
-        
-        const response = await sendMessage({ "prompt": input });
-        setIsLoading(false);
-        setMessages((prevMessages) => [...prevMessages, { text: response.result, sender: 'bot', sources: response.sources }]);
+
+        try {
+            const response = await sendMessage({ "prompt": input }, token);
+            setIsLoading(false);
+            setMessages((prevMessages) => [...prevMessages, { text: response.result, sender: 'bot', sources: response.sources }]);
+        } catch (error) {
+            setIsLoading(false);
+            if (error.message === 'Unauthorized') {
+                localStorage.removeItem('chatToken');
+                setShowPasswordModal(true);
+            } else {
+                setMessages((prevMessages) => [...prevMessages, { text: "An error occurred. Please try again.", sender: 'bot' }]);
+            }
+        }
     };
 
     return (

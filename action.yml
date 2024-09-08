@@ -5,6 +5,10 @@ inputs:
   dirs_to_scan:
     description: 'Comma-separated list of directories that you want to chat about'
     required: true
+  interface_password:
+    description: 'Password to access the interface'
+    required: false
+    default: ''
   openai_api_key:
     description: 'Your OpenAI API key'
     required: true
@@ -16,7 +20,7 @@ inputs:
     description: 'OpenAI model type for embedding'
     default: 'text-embedding-3-small'
     required: false
-  cloud_provider:
+  provider_name:
     description: 'Cloud provider'
     default: 'scaleway'
     required: false
