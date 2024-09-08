@@ -35,6 +35,8 @@ def get_model():
             logging.info(f"DB directory {PERSIST_DIRECTORY} does not exist. No need to clear.")
 
     if MODE == "directory":
+        if REPO_PATH == "":
+            raise Exception("Repo path is required for directory mode")
         return DirLoader(
             repo_path=REPO_PATH,
             force_reingest=CLEAR_DB_AT_RESTART,

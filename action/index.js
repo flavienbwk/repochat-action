@@ -86,7 +86,7 @@ try {
         console.log('Retrieved existing namespace:', namespace.id);
       } else {
         console.error('Error creating/retrieving namespace:', error);
-        throw error;
+        core.setFailed(error.message);
       }
     }
 
@@ -130,7 +130,7 @@ try {
           });
           console.log('Container updated:', container.id);
         } else {
-          throw error;
+          core.setFailed(error.message);
         }
       }
 
@@ -173,6 +173,7 @@ try {
       }
 
       // Feed RepoChat with repo data
+      // TODO(flavienbwk): !!
   
       // Set outputs
       core.setOutput('domain', containerEndpoint);
