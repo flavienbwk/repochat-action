@@ -17,7 +17,7 @@ async function sendFileToApi(filePath, apiUrl) {
 
   try {
     console.log(`Sending: ${filePath} to ${apiUrl}`);
-    const response = await axios.post("https://ghactionrepochatactiaw4fekyi-gh-action-repochat-action.functions.fnc.fr-par.scw.cloud/api/ingest", payload, { headers: { 'Content-Type': 'application/json' } });
+    const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json' } });
     return response;
   } catch (error) {
     console.error(`Error sending file: ${error.message}`);
@@ -250,7 +250,8 @@ try {
       const dirsToScanArray = dirsToScan.split(',').map(dir => dir.trim());
       for (const dir of dirsToScanArray) {
         console.log(`Ingesting files inside ${dir}...`);
-        ingestFiles(dir, containerEndpointApi, ['node_modules', '.git', '.env', 'package-lock.json']);
+        // ingestFiles(dir, containerEndpointApi, ['node_modules', '.git', '.env', 'package-lock.json']);
+        sendFileToApi(dir, containerEndpointApi);
       }
 
       // Set outputs
