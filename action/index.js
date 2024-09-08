@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
-import { Container, createClient, Secret } from '@scaleway/sdk';
+import { Container, createClient } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
@@ -206,8 +206,8 @@ try {
         MODE: 'api'
       },
       secretEnvironmentVariables: [
-        Secret('OPENAI_API_KEY', openaiApiKey),
-        Secret('INGEST_SECRET', parIngestSecret)
+        new Container.v1beta1.Secret('OPENAI_API_KEY', openaiApiKey),
+        new Container.v1beta1.Secret('INGEST_SECRET', parIngestSecret)
       ]
     };
 
