@@ -197,6 +197,7 @@ try {
         container = await containerApi.createContainer(containerConfig);
         console.log('Container created:', container.id);
       } catch (error) {
+        console.log(error)
         if (error.status && error.status === 409) {
           console.log('Container already exists, retrieving existing container');
           const containers = await containerApi.listContainers({ namespaceId: namespace.id });
