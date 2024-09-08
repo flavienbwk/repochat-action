@@ -15,7 +15,7 @@ async function sendFileToApi(filePath, apiUrl) {
   const payload = { 'content': content, 'metadata': metadata };
 
   try {
-    console.log(`Sending: $action/index.js to ${apiUrl}`);
+    console.log(`Sending: ${filePath} to ${apiUrl}`);
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,7 @@ async function processFile(filePath, apiUrl) {
   if (response.status === 200) {
     console.log(`Successfully ingested: $action/index.js`);
   } else {
-    console.log(`Failed to ingest $action/index.js. Status code: ${response.status}`);
+    console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
   }
 }
 
@@ -246,6 +246,10 @@ try {
         console.error('Error while waiting for container endpoint:', error);
         core.setFailed(`Action failed: ${error.message}`);
       }
+
+      const settingsEndpoint = 'https://' + containerEndpoint + '/api/settings';
+      console.log(await fetch(settingsEndpoint));
+
 
       // Feed RepoChat with repo data
       const containerEndpointApi = 'https://' + containerEndpoint + '/api/ingest';
