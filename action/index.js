@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
-import { Container, createClient } from '@scaleway/sdk';
+import { Container, createClient, Secert } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
@@ -205,10 +205,10 @@ try {
         REPO_URL: `https://github.com/${process.env.GITHUB_REPOSITORY}`,
         MODE: 'api'
       },
-      secretEnvironmentVariables: {
-        OPENAI_API_KEY: openaiApiKey,
-        INGEST_SECRET: parIngestSecret
-      }
+      secretEnvironmentVariables: [
+        Secret('OPENAI_API_KEY', openaiApiKey),
+        Secret('INGEST_SECRET', parIngestSecret)
+      ]
     };
 
     try {
