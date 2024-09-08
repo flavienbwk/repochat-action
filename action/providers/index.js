@@ -1,4 +1,4 @@
-import { handleScalewayProvider } from './scaleway';
+const { handleScalewayProvider } = require('./scaleway');
 
 const providers = {
     scaleway: handleScalewayProvider,

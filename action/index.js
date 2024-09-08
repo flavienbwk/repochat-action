@@ -1,7 +1,7 @@
-import * as core from '@actions/core';
-import { handleProvider } from './providers';
-import { uuidv4 } from './utils/uuidUtils';
-import { ingestFiles } from './utils/fileUtils';
+const core = require('@actions/core');
+const { handleProvider } = require('./providers');
+const { uuidv4 } = require('./utils/uuidUtils');
+const { ingestFiles } = require('./utils/fileUtils');
 
 try {
     const dirsToScan = core.getInput('dirs_to_scan');

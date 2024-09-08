@@ -1,4 +1,4 @@
-import { Container, createClient } from '@scaleway/sdk';
+const { Container, createClient } = require('@scaleway/sdk');
 
 export async function handleScalewayProvider(inputs, parIngestSecret) {
     const {
