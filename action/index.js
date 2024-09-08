@@ -99,8 +99,8 @@ try {
       port: 80,
       cpuLimit: 1000,
       memoryLimit: 1024,
-      minScale: 0,
-      maxScale: 2,
+      minScale: 1,  // will loose ingested data if rebooted
+      maxScale: 1,
       description: 'Repochat Action repochat',
       environmentVariables: {
         OPENAI_API_KEY: openaiApiKey,

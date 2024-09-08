@@ -46,6 +46,6 @@ async function ingestFiles(directoryPath, apiUrl) {
   }
 }
 
-module.exports = {
+export default {
   ingestFiles
 };
