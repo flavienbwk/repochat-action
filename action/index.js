@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
-import { Container, createClient, Secert } from '@scaleway/sdk';
+import { Container, createClient, Secret } from '@scaleway/sdk';
 
 const providers = ['scaleway'];
 
