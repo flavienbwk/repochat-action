@@ -2,24 +2,24 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-export function isValidFile(filePath) {
+function isValidFile(filePath) {
     return fs.statSync(filePath).isFile() && !path.basename(filePath).startsWith('.');
 }
 
-export function isExcluded(filePath, excludeFiles) {
+function isExcluded(filePath, excludeFiles) {
     return excludeFiles.some(pattern => {
         const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '``');
         return regex.test(filePath);
     });
 }
 
-export async function sendFileToApi(filePath, apiUrl, ingestSecret) {
+async function sendFileToApi(filePath, apiUrl, ingestSecret) {
     const content = fs.readFileSync(filePath, { encoding: 'base64' });
     const metadata = { 'source': path.basename(filePath) };
     const payload = { 'content': content, 'metadata': metadata };
 
     try {
-        console.log(`Sending: ${filePath}`);
+        console.log(`Sending: $action/utils/fileUtils.js`);
         const response = await axios.post(apiUrl, payload, { headers: { 'Content-Type': 'application/json', 'X-Ingest-Secret': ingestSecret } });
         return response;
     } catch (error) {
@@ -28,17 +28,17 @@ export async function sendFileToApi(filePath, apiUrl, ingestSecret) {
     }
 }
 
-export async function processFile(filePath, apiUrl, ingestSecret) {
-    console.log(`Sending file: ${filePath}`);
+async function processFile(filePath, apiUrl, ingestSecret) {
+    console.log(`Sending file: $action/utils/fileUtils.js`);
     const response = await sendFileToApi(filePath, apiUrl, ingestSecret);
     if (response.status === 200) {
-        console.log(`Successfully ingested: ${filePath}`);
+        console.log(`Successfully ingested: $action/utils/fileUtils.js`);
     } else {
-        console.log(`Failed to ingest ${filePath}. Status code: ${response.status}`);
+        console.log(`Failed to ingest $action/utils/fileUtils.js. Status code: ${response.status}`);
     }
 }
 
-export async function ingestFiles(directoryPath, apiUrl, ingestSecret, excludeFiles = []) {
+async function ingestFiles(directoryPath, apiUrl, ingestSecret, excludeFiles = []) {
     if (!fs.existsSync(directoryPath)) {
         console.error(`Error: ${directoryPath} does not exist.`);
         return;
@@ -66,7 +66,15 @@ export async function ingestFiles(directoryPath, apiUrl, ingestSecret, excludeFi
         } else if (isValidFile(filePath) && !isExcluded(filePath, excludeFiles)) {
             await processFile(filePath, apiUrl, ingestSecret);
         } else {
-            console.log(`Skipping invalid, hidden, or excluded file: ${filePath}`);
+            console.log(`Skipping invalid, hidden, or excluded file: $action/utils/fileUtils.js`);
         }
     }
 }
+
+module.exports = {
+    isValidFile,
+    isExcluded,
+    sendFileToApi,
+    processFile,
+    ingestFiles
+};

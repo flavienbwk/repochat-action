@@ -1,6 +1,6 @@
 const { Container, createClient } = require('@scaleway/sdk');
 
-export async function handleScalewayProvider(inputs, parIngestSecret) {
+module.exports.handleScalewayProvider = async function(inputs, parIngestSecret) {
     const {
         providerKeyId,
         providerKeySecret,
@@ -10,7 +10,8 @@ export async function handleScalewayProvider(inputs, parIngestSecret) {
         openaiApiKey,
         openaiModelTypeInference,
         openaiModelTypeEmbedding,
-        interfacePassword
+        interfacePassword,
+        dirsToScan
     } = inputs;
 
     const client = createClient({
