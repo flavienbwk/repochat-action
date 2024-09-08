@@ -161,7 +161,7 @@ jobs:
 - [x] GitHub Actions release
 - [x] Secure ingestion endpoint (/api/ingest)
 - [x] Secure RepoChat with optional password
-- [ ] Maintain state over S3
+- [ ] Maintain state over S3 (would allow containers autoscaling)
 
 ## Why not use Vercel ?
 
