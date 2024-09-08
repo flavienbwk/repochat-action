@@ -173,13 +173,14 @@ try {
       }
 
       // Feed RepoChat with repo data
+  
+      // Set outputs
+      core.setOutput('domain', containerEndpoint);
     } catch (error) {
       console.error('Error deploying container:', error);
     }
     
   }
-  
-  core.setOutput('domain', containerEndpoint);
   
 } catch (error) {
   core.setFailed(error.message);
