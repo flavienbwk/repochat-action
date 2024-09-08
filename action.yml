@@ -37,6 +37,7 @@ inputs:
     required: false
 runs:
   using: 'node16'
+  pre: 'npm run build'
   main: 'lib/index.js'
 branding:
   icon: 'code'
