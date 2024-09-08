@@ -17,6 +17,8 @@ Features:
 - :arrows_counterclockwise: Sateless ingestion via API ([api mode](./api.docker-compose.yml#L6))
 - :closed_lock_with_key: Optional password on web UI
 
+![RepoChat interface example](./media/screenshot.png)
+
 ## Requirements
 
 - A [supported cloud provider](#supported-cloud-providers) credentials ;
