@@ -71,7 +71,7 @@ class DataLoader:
         # RecursiveTextSplitter
         # Chunk size big enough
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=512,
+            chunk_size=2048,
             chunk_overlap=20,
             separators=["\n\n", "\n", "(?<=\. )", " ", ""],
         )

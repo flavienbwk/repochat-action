@@ -103,7 +103,7 @@ class APILoader:
                 processed_docs.append(doc)
 
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=512,
+            chunk_size=2048,
             chunk_overlap=20,
             separators=["\n\n", "\n", "(?<=\. )", " ", ""],
         )

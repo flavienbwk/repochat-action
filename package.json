@@ -1,6 +1,6 @@
 {
     "name": "gh-action-repochat",
-    "version": "0.12.0",
+    "version": "0.13.0",
     "type": "module",
     "description": "GitHub Action to run repochat",
     "main": "index.js",

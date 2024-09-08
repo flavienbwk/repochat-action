@@ -26,6 +26,14 @@ jobs:
                 provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
                 provider_default_region: 'fr-par'
                 provider_default_zone: 'fr-par-2'
+
             - name: Get repochat domain
               run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT
               id: repochat_domain
+
+            - name: Set repo URL
+              run: |
+                REPO_URL="https://github.com/${{ github.repository }}"
+                curl -X POST "$DOMAIN/api/set-repo-url" \
+                    -H "Content-Type: application/json" \
+                    -d "{\"repoUrl\": \"$REPO_URL\"}"
