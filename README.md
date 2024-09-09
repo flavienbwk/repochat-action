@@ -29,6 +29,13 @@ Features:
 Easily add RepoChat to your project using GitHub Actions:
 
 ```yaml
+name: "Deploy Repochat for this repo"
+
+on:
+    push:
+        branches:
+            - main
+
 jobs:
     steps:
     - name: Deploy a convenient chatbot for your repo
