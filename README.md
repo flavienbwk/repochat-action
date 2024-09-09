@@ -32,18 +32,21 @@ Easily add RepoChat to your project using GitHub Actions:
 name: "Deploy Repochat for this repo"
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+    - main
 
 jobs:
+  deploy:
+    runs-on: ubuntu-latest
     steps:
-    - name: Deploy a convenient chatbot for your repo
+    - uses: actions/checkout@v2
+    - uses: flavienbwk/repochat-action@v0
+      name: 'Deploy Repochat'
       id: deploy_repochat
-      uses: flavienbwk/repochat-action@v0
       with:
         # All parameters not explicitly marked as "optional" are required
-        dirs_to_scan: "./example,README.md"  # comma-separated glob dirs to analyze
+        dirs_to_scan: "."  # comma-separated glob dirs to analyze
         interface_password: ${{ secrets.INTERFACE_PASSWORD }}  # optional
         openai_api_key: ${{ secrets.OPENAI_API_KEY }}
         openai_model_type_inference: "gpt-4o-mini"
@@ -55,7 +58,7 @@ jobs:
         provider_default_region: 'fr-par'
         provider_default_zone: 'fr-par-2'
 
-    - name: Get RepoChat domain
+    - name: Get repochat domain
       run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT
       id: repochat_domain
 ```
