@@ -65,6 +65,11 @@ jobs:
 
 Get a practical implementation example with [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml).
 
+You can restrict your OpenAI API key permissions to:
+
+- Models: `Read`
+- Model capabilities: `Write`
+
 ### Supported Cloud providers
 
 - **[Scaleway](https://www.scaleway.com/en/)**
@@ -79,6 +84,8 @@ Get a practical implementation example with [`.github/workflows/deploy.yml`](./.
     provider_default_region: 'fr-par'  # example
     provider_default_zone: 'fr-par-2'  # example
     ```
+
+  - Policies: ContainersFullAccess, ServerlessJobsFullAccess, FunctionsFullAccess
 
 ## Other deployments
 
