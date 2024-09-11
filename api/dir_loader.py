@@ -2,37 +2,76 @@ import os
 import time
 import logging
 import collections
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.text_splitter import MarkdownHeaderTextSplitter
+from langchain.text_splitter import (
+    RecursiveCharacterTextSplitter,
+    MarkdownHeaderTextSplitter,
+)
 from langchain_community.document_loaders.unstructured import UnstructuredFileLoader
 
 
-class DataLoader:
-    """Create, load, save the DB using the DirectoryLoader"""
+class DirLoader:
+    """Create the necessary objects to create a QARetrieval chain"""
 
     def __init__(
         self,
-        source_directory,
-        persist_directory,
+        repo_path=None,
+        force_reingest=True,
+        model_type_inference=None,
+        model_type_embedding=None,
+        persist_directory=None,
+        pg_connection_string=None,
     ):
-        self.source_directory = source_directory
+        self.repo_path = repo_path
         self.persist_directory = persist_directory
-        try:
-            # create persist directory recursively
-            os.makedirs(self.persist_directory, exist_ok=True)
-        except Exception as e:
-            logging.warning("%s", e)
+        self.pg_connection_string = pg_connection_string
+        self.model_type_inference = model_type_inference
+        self.model_type_embedding = model_type_embedding
+
+        self.embeddings = self.get_embeddings()
+        self.llm = self.get_llm()
+        self.prompt = self.get_prompt()
+
+        if force_reingest:
+            self.db = self.set_db()
+        else:
+            print("Loading cached DB...")
+            self.db = self.get_db()
+            print("Loaded.")
+
+        self.retriever = self.db.as_retriever()
+        self.retrieval_qa_chain = self.get_retrieval_qa()
+
+    def get_template(self):
+        return """
+        Given this text extracts:
+        -----
+        {context}
+        -----
+        Please answer with to the following question:
+        Question: {question}
+        Helpful Answer:
+        """
+
+    def get_prompt(self) -> PromptTemplate:
+        return PromptTemplate(
+            template=self.get_template(), input_variables=["context", "question"]
+        )
+
+    def get_embeddings(self) -> OpenAIEmbeddings:
+        return OpenAIEmbeddings(model=self.model_type_embedding)
+
+    def get_llm(self):
+        return ChatOpenAI(model=self.model_type_inference)
 
     def load_from_directory(self):
         """Load files from the specified directory"""
         loader = DirectoryLoader(
-            self.source_directory,
+            self.repo_path,
             glob="**/*",
             loader_cls=UnstructuredFileLoader,
             show_progress=True,
@@ -53,14 +92,12 @@ class DataLoader:
         markdown_splitter = MarkdownHeaderTextSplitter(
             headers_to_split_on=headers_to_split_on
         )
-
         md_doc = markdown_splitter.split_text(doc.page_content)
         for i in range(len(md_doc)):
             md_doc[i].metadata = md_doc[i].metadata | doc.metadata
         return md_doc
 
     def split_docs(self, docs):
-        # Process documents based on their extension
         processed_docs = []
         for doc in docs:
             if doc.metadata.get("source", "").endswith(".md"):
@@ -68,123 +105,63 @@ class DataLoader:
             else:
                 processed_docs.append(doc)
 
-        # RecursiveTextSplitter
-        # Chunk size big enough
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=2048,
             chunk_overlap=20,
             separators=["\n\n", "\n", "(?<=\. )", " ", ""],
         )
 
-        splitted_docs = splitter.split_documents(processed_docs)
-        return splitted_docs
+        return splitter.split_documents(processed_docs)
 
-    def save_to_db(self, splitted_docs, embeddings):
+    def save_to_db(self, splitted_docs):
         """Save chunks to Chroma DB"""
         for i, sub_splitted_doc in enumerate(splitted_docs):
             print(f"Saving document to DB: {i+1}/{len(splitted_docs)}")
             time.sleep(0.05)  # rate-limiting API calls to OpenAI
             db = Chroma.from_documents(
-                [sub_splitted_doc], embeddings, persist_directory=self.persist_directory
+                [sub_splitted_doc],
+                self.embeddings,
+                persist_directory=self.persist_directory,
             )
         return db
 
-    def load_from_db(self, embeddings):
-        """Load chunks from Chroma DB"""
-        db = Chroma(
-            persist_directory=self.persist_directory, embedding_function=embeddings
-        )
-        return db
+    def load_from_db(self):
+        if self.pg_connection_string:
+            print("Using PostgreSQL as storage backend.")
+            from langchain_postgres import PGVector
 
-    def set_db(self, embeddings):
-        """Create, save, and load db"""
-        # Load docs
-        docs = self.load_from_directory()
-
-        # Split Docs
-        splitted_docs = self.split_docs(docs)
-
-        # Save to DB
-        db = self.save_to_db(splitted_docs, embeddings)
-
-        return db
-
-    def get_db(self, embeddings):
-        """Create, save, and load db"""
-        db = self.load_from_db(embeddings)
-        return db
-
-
-class DirLoader:
-    """Create the necessary objects to create a QARetrieval chain"""
-
-    def __init__(
-        self,
-        repo_path=None,
-        force_reingest=True,
-        model_type_inference=None,
-        model_type_embedding=None,
-        persist_directory=None,
-    ):
-        self.model_type_inference = model_type_inference
-        self.model_type_embedding = model_type_embedding
-        self.repo_path = repo_path
-        self.persist_directory = persist_directory
-
-        self.embeddings = self.get_embeddings()
-        self.llm = self.get_llm()
-        self.prompt = self.get_prompt()
-
-        if force_reingest:
-            self.db = DataLoader(self.repo_path, self.persist_directory).set_db(
-                self.embeddings
+            return PGVector(
+                embeddings=self.embeddings,
+                collection_name="repochat",
+                connection=self.pg_connection_string,
+                use_jsonb=True,
             )
         else:
-            print("Loading cached DB...")
-            self.db = DataLoader(self.repo_path, self.persist_directory).get_db(
-                self.embeddings
+            print("Using ChromaDB as storage backend.")
+            return Chroma(
+                persist_directory=self.persist_directory,
+                embedding_function=self.embeddings,
             )
-            print("Loaded.")
 
-        self.retriever = self.db.as_retriever()
-        self.retrieval_qa_chain = self.get_retrieval_qa()
+    def set_db(self):
+        """Create, save, and load db"""
+        docs = self.load_from_directory()
+        splitted_docs = self.split_docs(docs)
+        return self.save_to_db(splitted_docs)
 
-    def get_template(self):
-        template = """
-        Given this text extracts:
-        -----
-        {context}
-        -----
-        Please answer with to the following question:
-        Question: {question}
-        Helpful Answer:
-        """
-        return template
-
-    def get_prompt(self) -> PromptTemplate:
-        prompt = PromptTemplate(
-            template=self.get_template(), input_variables=["context", "question"]
-        )
-        return prompt
-
-    def get_embeddings(self) -> OpenAIEmbeddings:
-        embeddings = OpenAIEmbeddings(model=self.model_type_embedding)
-        return embeddings
-
-    def get_llm(self):
-        llm = ChatOpenAI(model=self.model_type_inference)
-        return llm
+    def get_db(self):
+        """Create, save, and load db"""
+        return self.load_from_db()
 
     def get_retrieval_qa(self):
         chain_type_kwargs = {"prompt": self.prompt}
-        qa = RetrievalQA.from_chain_type(
+        return RetrievalQA.from_chain_type(
             llm=self.llm,
             chain_type="stuff",
             retriever=self.retriever,
             return_source_documents=True,
             chain_type_kwargs=chain_type_kwargs,
         )
-        return qa
 
     def retrieval_qa_inference(self, question, verbose=True):
         query = {"query": question}

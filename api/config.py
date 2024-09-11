@@ -16,8 +16,10 @@ INTERFACE_PASSWORD = os.getenv('INTERFACE_PASSWORD', '').strip()
 OPEN_AI_API_KEY = os.environ['OPENAI_API_KEY'].strip()
 MODEL_TYPE_INFERENCE = os.environ['MODEL_TYPE_INFERENCE'].strip()
 MODEL_TYPE_EMBEDDING = os.environ['MODEL_TYPE_EMBEDDING'].strip()
-CLEAR_DB_AT_RESTART = True if os.getenv('CLEAR_DB_AT_RESTART', 'false').strip().lower() == 'true' else False
+
 MODE = os.environ['MODE'].strip()
+CLEAR_DB_AT_RESTART = True if os.getenv('CLEAR_DB_AT_RESTART', 'false').strip().lower() == 'true' else False
+PG_CONNECTION_STRING = os.getenv('PG_CONNECTION_STRING', '').strip()
 
 PATH_NAME_SPLITTER = f'{CURRENT_DIR}/splitted_docs.jsonl'
 PERSIST_DIRECTORY = f'{CURRENT_DIR}/db/chroma/'

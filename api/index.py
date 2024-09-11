@@ -25,6 +25,7 @@ from api.config import (
     REPO_PATH,
     REPO_URL,
     MODE,
+    PG_CONNECTION_STRING,
 )
 
 # Constants
@@ -102,12 +103,14 @@ def get_model():
             model_type_inference=MODEL_TYPE_INFERENCE,
             model_type_embedding=MODEL_TYPE_EMBEDDING,
             persist_directory=PERSIST_DIRECTORY,
+            pg_connection_string=PG_CONNECTION_STRING,
         )
     elif MODE == "api":
         return APILoader(
             model_type_inference=MODEL_TYPE_INFERENCE,
             model_type_embedding=MODEL_TYPE_EMBEDDING,
             persist_directory=PERSIST_DIRECTORY,
+            pg_connection_string=PG_CONNECTION_STRING,
         )
     else:
         raise ValueError(f"Invalid ingestion mode {MODE}")

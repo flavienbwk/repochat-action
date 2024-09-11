@@ -1,7 +1,6 @@
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain_chroma import Chroma
 from langchain.text_splitter import (
     RecursiveCharacterTextSplitter,
     MarkdownHeaderTextSplitter,
@@ -17,10 +16,12 @@ class APILoader:
         model_type_inference=None,
         model_type_embedding=None,
         persist_directory=None,
+        pg_connection_string=None,
     ):
         self.model_type_inference = model_type_inference
         self.model_type_embedding = model_type_embedding
         self.persist_directory = persist_directory
+        self.pg_connection_string = pg_connection_string
 
         self.embeddings = self.get_embeddings()
         self.llm = self.get_llm()
@@ -30,9 +31,24 @@ class APILoader:
         self.retrieval_qa_chain = self.get_retrieval_qa()
 
     def load_or_create_db(self):
-        return Chroma(
-            persist_directory=self.persist_directory, embedding_function=self.embeddings
-        )
+        if self.pg_connection_string:
+            print("Using PostgreSQL as storage backend.")
+            from langchain_postgres import PGVector
+
+            return PGVector(
+                embeddings=self.embeddings,
+                collection_name="repochat",
+                connection=self.pg_connection_string,
+                use_jsonb=True,
+            )
+        else:
+            print("Using ChromaDB as storage backend.")
+            from langchain_chroma import Chroma
+
+            return Chroma(
+                persist_directory=self.persist_directory,
+                embedding_function=self.embeddings,
+            )
 
     def get_template(self):
         template = """
@@ -59,11 +75,6 @@ class APILoader:
     def get_llm(self):
         llm = ChatOpenAI(model=self.model_type_inference)
         return llm
-
-    def load_or_create_db(self):
-        return Chroma(
-            persist_directory=self.persist_directory, embedding_function=self.embeddings
-        )
 
     def get_retrieval_qa(self):
         chain_type_kwargs = {"prompt": self.prompt}

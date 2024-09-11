@@ -182,7 +182,7 @@ You can restrict your OpenAI API key permissions to:
 - [x] GitHub Actions release
 - [x] Secure ingestion endpoint (/api/ingest)
 - [x] Secure RepoChat with optional password
-- [ ] Maintain state over S3 (would allow containers autoscaling)
+- [x] Maintain state over PG
 
 ## Why not use Vercel ?
 
