@@ -8,6 +8,17 @@ import useAuth from './hooks/useAuth';
 
 import './globals.css';
 
+function Loader() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center min-h-screen bg-white bg-opacity-75">
+      <div className="loader flex flex-col items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <p className="mt-4 text-blue-500">Loading settings...</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [settings, setSettings] = useState({});
   const { token, isTokenValid, showPasswordModal, handleValidate, setShowPasswordModal } = useAuth();
@@ -28,8 +39,17 @@ export default function Home() {
     fetchSettings();
   }, []);
 
+  useEffect(() => {
+    if (isLoading) {
+      document.title = "RepoChat";
+    } else {
+      document.title = settings.repo_name ? `RepoChat - ${settings.repo_name}` : "RepoChat";
+    }
+  }, [isLoading, settings.repo_name]);
+
   return (
-    <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-between min-h-screen">
+    <div className="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-between min-h-screen">
+      {isLoading && <Loader />}
       <main className="w-full px-4 flex-grow flex items-center">
         <div className="w-full max-w-4xl mx-auto">
           <div className="relative">
