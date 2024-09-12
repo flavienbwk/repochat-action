@@ -4,7 +4,7 @@ const { uuidv4 } = require('./utils/uuidUtils');
 const { ingestFiles } = require('./utils/fileUtils');
 
 try {
-    const actionVersion = require('../package.json').version;
+    const actionVersion = '0.15.0' // require('../package.json').version;
     console.log(`Action version: ${actionVersion}`);
 
     const dirsToScan = core.getInput('dirs_to_scan');
