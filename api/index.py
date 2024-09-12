@@ -12,19 +12,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from jose import JWTError, jwt
 
-from api.dir_loader import DirLoader
 from api.api_loader import APILoader
 from api.config import (
-    CLEAR_DB_AT_RESTART,
     MODEL_TYPE_INFERENCE,
     MODEL_TYPE_EMBEDDING,
     PERSIST_DIRECTORY,
     INGEST_SECRET,
     INTERFACE_PASSWORD,
     REPO_NAME,
-    REPO_PATH,
     REPO_URL,
-    MODE,
     PG_CONNECTION_STRING,
 )
 
@@ -91,29 +87,12 @@ def get_optional_current_user(
 
 # Model initialization
 def get_model():
-    if CLEAR_DB_AT_RESTART:
-        clear_database()
-
-    if MODE == "directory":
-        if not REPO_PATH:
-            raise ValueError("Repo path is required for directory mode")
-        return DirLoader(
-            repo_path=REPO_PATH,
-            force_reingest=CLEAR_DB_AT_RESTART,
-            model_type_inference=MODEL_TYPE_INFERENCE,
-            model_type_embedding=MODEL_TYPE_EMBEDDING,
-            persist_directory=PERSIST_DIRECTORY,
-            pg_connection_string=PG_CONNECTION_STRING,
-        )
-    elif MODE == "api":
-        return APILoader(
-            model_type_inference=MODEL_TYPE_INFERENCE,
-            model_type_embedding=MODEL_TYPE_EMBEDDING,
-            persist_directory=PERSIST_DIRECTORY,
-            pg_connection_string=PG_CONNECTION_STRING,
-        )
-    else:
-        raise ValueError(f"Invalid ingestion mode {MODE}")
+    return APILoader(
+        model_type_inference=MODEL_TYPE_INFERENCE,
+        model_type_embedding=MODEL_TYPE_EMBEDDING,
+        persist_directory=PERSIST_DIRECTORY,
+        pg_connection_string=PG_CONNECTION_STRING,
+    )
 
 
 def clear_database():
@@ -186,11 +165,6 @@ async def query(
 async def ingest(
     data: IngestData, x_ingest_secret: str = Header(..., alias="X-Ingest-Secret")
 ):
-    if MODE != "api":
-        raise HTTPException(
-            status_code=400,
-            detail="Ingestion is only available in API mode (set env MODE=api)",
-        )
     if x_ingest_secret != INGEST_SECRET:
         raise HTTPException(status_code=401, detail="Invalid ingest secret")
     try:

@@ -5,6 +5,7 @@ on:
     push:
         branches:
             - main
+            - f/pg-backend
 
 jobs:
     deploy:
@@ -26,6 +27,9 @@ jobs:
                 provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
                 provider_default_region: 'fr-par'
                 provider_default_zone: 'fr-par-2'
+                pg_connection_string: ${{ secrets.PG_CONNECTION_STRING }}
+                min_scale: 0
+                max_scale: 2
 
             - name: Get repochat domain
               run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT

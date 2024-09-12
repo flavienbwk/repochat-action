@@ -39,6 +39,26 @@ inputs:
   provider_project_id:
     description: 'Cloud provider project ID (Scaleway specific)'
     required: false
+  pg_connection_string:
+    description: 'PostgreSQL connection string'
+    required: false
+    default: ''
+  cpu_limit:
+    description: 'CPU limit for the container'
+    required: false
+    default: '1000'
+  memory_limit:
+    description: 'Memory limit for the container'
+    required: false
+    default: '1024'
+  min_scale:
+    description: 'Minimum scale for the container'
+    required: false
+    default: '1'
+  max_scale:
+    description: 'Maximum scale for the container'
+    required: false
+    default: '1'
 runs:
   using: 'node16'
   main: 'lib/index.js'
