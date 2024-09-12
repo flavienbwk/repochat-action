@@ -1,11 +1,16 @@
 name: "Deploy Repochat for this repo"
 
 on:
-    workflow_dispatch:
+    # Only run after the image is pushed
+    workflow_run:
+      workflows: [ "build-and-push" ]
+      branches: [ "main" ]
+      types: 
+        - completed
+    # Deploy always on specific branches for tests
     push:
         branches:
-            - main
-            - f/pg-backend
+            - beta/*
 
 jobs:
     deploy:
