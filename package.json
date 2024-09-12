@@ -1,6 +1,6 @@
 {
     "name": "gh-action-repochat",
-    "version": "0.16.1",
+    "version": "0.16.2",
     "type": "commonjs",
     "description": "GitHub Action to run RepoChat",
     "main": "index.js",
