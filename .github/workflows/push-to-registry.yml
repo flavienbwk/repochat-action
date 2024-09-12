@@ -4,6 +4,7 @@ on:
   push:
     branches:
         - main
+        - f/pg-backend
     paths:
         - 'Dockerfile'
         - 'package.json'
