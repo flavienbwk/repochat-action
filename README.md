@@ -82,7 +82,7 @@ jobs:
 | min_scale                   | No       | No     | Default to 1. Must be left to 1 if not using the PG connection.                                          |
 | max_scale                   | No       | No     | Default to 1. Must be left to 1 if not using the PG connection.                                          |
 
-Get a practical implementation example with [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml).
+Get a practical implementation example with [`.github/workflows/push-deploy.yml`](./.github/workflows/push-deploy.yml#L76).
 
 You can restrict your OpenAI API key permissions to:
 
