@@ -1,4 +1,4 @@
-name: "Deploy Repochat for this repo"
+name: "Build, push and deploy Repochat for this repo"
 
 on:
   push:
@@ -33,9 +33,6 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Pull latest Docker image for cache
-      run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
@@ -47,12 +44,14 @@ jobs:
           type=raw,value={{date 'YYYYMMDDHHmmss'}}
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: .
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        cache-to: type=inline
 
     - name: Extract metadata (tags, labels) for Docker (latest)
       id: meta_latest
@@ -64,13 +63,15 @@ jobs:
           type=raw,value=latest
 
     - name: Build and push Docker image (latest)
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       if: ${{ github.ref == 'refs/heads/main' }}
       with:
         context: .
         push: true
         tags: ${{ steps.meta_latest.outputs.tags }}
         labels: ${{ steps.meta_latest.outputs.labels }}
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        cache-to: type=inline
 
   deploy:
     runs-on: ubuntu-latest
