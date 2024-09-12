@@ -43,7 +43,6 @@ jobs:
         tags: |
           type=raw,value=${{ steps.package-version.outputs.current-version}}
           type=raw,value={{date 'YYYYMMDDHHmmss'}}
-          type=raw,value=latest
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
@@ -52,3 +51,21 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Extract metadata (tags, labels) for Docker (latest)
+      id: meta_latest
+      if: ${{ github.ref == 'refs/heads/main' }}
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=latest
+
+    - name: Build and push Docker image (latest)
+      uses: docker/build-push-action@v4
+      if: ${{ github.ref == 'refs/heads/main' }}
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta_latest.outputs.tags }}
+        labels: ${{ steps.meta_latest.outputs.labels }}

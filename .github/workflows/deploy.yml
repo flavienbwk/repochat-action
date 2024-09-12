@@ -4,7 +4,9 @@ on:
     # Only run after the image is pushed
     workflow_run:
       workflows: [ "build-and-push" ]
-      branches: [ "main" ]
+      branches:
+        - main
+        - f/pg-backend
       types: 
         - completed
     # Deploy always on specific branches for tests
