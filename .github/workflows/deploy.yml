@@ -3,9 +3,10 @@ name: "Deploy Repochat for this repo"
 on:
     # Only run after the image is pushed
     workflow_run:
-      workflows: [ "build-and-push" ]
+      workflows: [ "Build and Push Docker image" ]
       branches:
         - main
+        - beta/*
         - f/pg-backend
       types: 
         - completed
