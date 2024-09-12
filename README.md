@@ -47,6 +47,7 @@ jobs:
       with:
         # All parameters not explicitly marked as "optional" are required
         dirs_to_scan: "."  # comma-separated glob dirs to analyze
+        interface_password: ${{ secrets.INTERFACE_PASSWORD }}  # optional
         openai_api_key: ${{ secrets.OPENAI_API_KEY }}
         openai_model_type_inference: "gpt-4o-mini"
         openai_model_type_embedding : "text-embedding-3-small"
@@ -56,7 +57,6 @@ jobs:
         provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
         provider_default_region: 'fr-par'
         provider_default_zone: 'fr-par-2'
-        interface_password: ${{ secrets.INTERFACE_PASSWORD }}  # optional
 
     - name: Get repochat domain
       run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT

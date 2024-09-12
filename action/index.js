@@ -55,6 +55,9 @@ try {
     console.log(`Cloud Provider: ${cloudProvider}`);
     console.log(`Provider Key ID: ${providerKeyId.substring(0, 3)}...`);
     console.log(`Provider Key Secret: ${providerKeySecret.substring(0, 5)}...`);
+    console.log('pgConnectionString (nb chars):', pgConnectionString.length);
+    console.log('CPU and Memory limits:', cpuLimit, memoryLimit);
+    console.log('Min and Max scale:', minScale, maxScale);
 
     if (!pgConnectionString && (minScale !== '1' || maxScale !== '1')) {
         throw new Error('min_scale and max_scale must be 1 if the PostgreSQL connection is disabled (pg_connection_string). This is because the container is stateless. This means you will lose ingested data if the container restarts. Also, ingesting data with multiple containers will make only one of the X containers be filled with data. Others won\'t have their data replicated as it is a local DB (ChromaDB).');
