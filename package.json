@@ -2,7 +2,7 @@
     "name": "gh-action-repochat",
     "version": "0.16.0",
     "type": "commonjs",
-    "description": "GitHub Action to run RepoChat Action",
+    "description": "GitHub Action to run RepoChat",
     "main": "index.js",
     "scripts": {
         "build": "ncc build action/index.js -o lib"
