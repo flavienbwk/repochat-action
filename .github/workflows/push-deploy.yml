@@ -14,7 +14,6 @@ env:
 jobs:
 
   build-and-push:
-    if: contains(github.event.head_commit.modified, 'package.json')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,6 +33,9 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Pull latest Docker image for cache
+      run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
