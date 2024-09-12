@@ -76,10 +76,8 @@ module.exports.handleScalewayProvider = async function(inputs) {
     ];
     if (interfacePassword)
         listOfSecrets.push({ key: 'INTERFACE_PASSWORD', value: interfacePassword });
-    console.log('pgConnectionString (nb chars):', pgConnectionString.length);
     if (pgConnectionString)
         listOfSecrets.push({ key: 'PG_CONNECTION_STRING', value: pgConnectionString });
-    console.log('CPU and Memory limits:', cpuLimit, memoryLimit);
 
     const containerConfig = {
         name: containerName,

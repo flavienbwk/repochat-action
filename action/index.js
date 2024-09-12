@@ -48,7 +48,7 @@ try {
         throw new Error('provider_default_zone is required');
     }
 
-    console.log(`Directories to scan: ${dirsToScan}`);
+    console.log(`Directories or files to scan: ${dirsToScan}`);
     console.log(`OpenAI API Key: ${openaiApiKey.substring(0, 5)}...`);
     console.log(`OpenAI Model Type Inference: ${openaiModelTypeInference}`);
     console.log(`OpenAI Model Type Embedding: ${openaiModelTypeEmbedding}`);
