@@ -1,6 +1,6 @@
 # Repochat Action
 
-[![Deployment CI](https://github.com/flavienbwk/repochat-action/actions/workflows/deploy.yml/badge.svg)](https://github.com/flavienbwk/repochat-action/actions/workflows/deploy.yml)
+[![Deployment CI](https://github.com/flavienbwk/repochat-action/actions/workflows/push-deploy.yml/badge.svg)](https://github.com/flavienbwk/repochat-action/actions/workflows/push-deploy.yml)
 [![GitHub release](https://img.shields.io/github/v/release/flavienbwk/repochat-action)](https://github.com/flavienbwk/repochat-action/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
