@@ -1,1 +1,17 @@
-dir.docker-compose.yml
+services:
+
+  repochat:
+    build: .
+    environment:
+      REPO_NAME: ${REPO_NAME}
+      REPO_URL: ${REPO_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      INGEST_SECRET: ${INGEST_SECRET}
+      MODEL_TYPE_INFERENCE: ${MODEL_TYPE_INFERENCE}
+      MODEL_TYPE_EMBEDDING: ${MODEL_TYPE_EMBEDDING}
+      INTERFACE_PASSWORD: ${INTERFACE_PASSWORD:-}
+      PG_CONNECTION_STRING: ${PG_CONNECTION_STRING:-}
+    #volumes:
+    # - chromadb:/usr/app/db/chroma:rw  # to persist DB across reboots if desired (uncomment volumes)
+    ports:
+      - "3001:80"

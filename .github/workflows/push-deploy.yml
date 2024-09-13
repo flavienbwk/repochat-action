@@ -1,0 +1,102 @@
+name: "Build, push and deploy Repochat for this repo"
+
+on:
+  push:
+    branches:
+      - main
+      - beta/*
+      - f/pg-backend
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Get version from package.json
+      id: package-version
+      uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=${{ steps.package-version.outputs.current-version}}
+          type=raw,value={{date 'YYYYMMDDHHmmss'}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.package-version.outputs.current-version}}
+        cache-to: type=inline
+
+    - name: Extract metadata (tags, labels) for Docker (latest)
+      id: meta_latest
+      if: ${{ github.ref == 'refs/heads/main' }}
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=latest
+
+    - name: Build and push Docker image (latest)
+      uses: docker/build-push-action@v6
+      if: ${{ github.ref == 'refs/heads/main' }}
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta_latest.outputs.tags }}
+        labels: ${{ steps.meta_latest.outputs.labels }}
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.package-version.outputs.current-version}}
+        cache-to: type=inline
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        name: 'Deploy Repochat'
+        id: deploy_repochat
+        with:
+          dirs_to_scan: "README.md,package.json,Dockerfile,api,action,app"
+          interface_password: ${{ secrets.INTERFACE_PASSWORD }}
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          openai_model_type_inference: "gpt-4o-mini"
+          openai_model_type_embedding : "text-embedding-3-small"
+          provider_name: 'scaleway'
+          provider_key_id: ${{ secrets.PROVIDER_KEY_ID }}
+          provider_key_secret: ${{ secrets.PROVIDER_KEY_SECRET }}
+          provider_project_id: ${{ secrets.PROVIDER_PROJECT_ID }}
+          provider_default_region: 'fr-par'
+          provider_default_zone: 'fr-par-2'
+          pg_connection_string: ${{ secrets.PG_CONNECTION_STRING }}
+          min_scale: 0
+          max_scale: 2
+
+      - name: Get repochat domain
+        run: echo "DOMAIN=${{ steps.deploy_repochat.outputs.domain }}" >> $GITHUB_OUTPUT
+        id: repochat_domain

@@ -13,8 +13,8 @@ Features:
 
 - :sparkles: A nice web UI
 - :octocat: Available as a GitHub Action
-- :floppy_disk: Stateful ingestion mode ([directory mode](./dir.docker-compose.yml#L6))
-- :arrows_counterclockwise: Sateless ingestion via API ([api mode](./api.docker-compose.yml#L6))
+- :arrows_counterclockwise: Sateless ingestion via API
+- :floppy_disk: Optional state persisted to PostgreSQL or ChromaDB
 - :closed_lock_with_key: Optional password on web UI
 
 ![RepoChat interface example](./media/screenshot.png)
@@ -63,7 +63,26 @@ jobs:
       id: repochat_domain
 ```
 
-Get a practical implementation example with [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml).
+| Name                        | Required | Secret | Description                                                                                              |
+| --------------------------- | -------- | ------ | -------------------------------------------------------------------------------------------------------- |
+| dirs_to_scan                | Yes      | No     | Comma-separated glob directories to analyze                                                              |
+| openai_api_key              | Yes      | Yes    | OpenAI API key for authentication                                                                        |
+| openai_model_type_inference | Yes      | No     | OpenAI model type for inference (e.g., "gpt-4o-mini")                                                    |
+| openai_model_type_embedding | Yes      | No     | OpenAI model type for embedding (e.g., "text-embedding-3-small")                                         |
+| provider_name               | Yes      | No     | Name of the cloud provider (e.g., 'scaleway')                                                            |
+| provider_key_id             | Yes      | Yes    | Cloud provider API key ID                                                                                |
+| provider_key_secret         | Yes      | Yes    | Cloud provider API key secret                                                                            |
+| provider_project_id         | Yes      | Yes    | Cloud provider project ID                                                                                |
+| provider_default_region     | Yes      | No     | Default region for the cloud provider (e.g., 'fr-par')                                                   |
+| provider_default_zone       | Yes      | No     | Default zone for the cloud provider (e.g., 'fr-par-2')                                                   |
+| interface_password          | No       | Yes    | Optional password for the interface                                                                      |
+| pg_connection_string        | No       | Yes    | Enables storage to external PG DB (format: 'postgresql://username:password@hostname:port/database_name') |
+| cpu_limit                   | No       | No     | Default to 1000 (1 vCPU). Capabilities depend on the Cloud provider.                                     |
+| memory_limit                | No       | No     | Default to 1024. Capabilities depend on the Cloud provider.                                              |
+| min_scale                   | No       | No     | Default to 1. Must be left to 1 if not using the PG connection.                                          |
+| max_scale                   | No       | No     | Default to 1. Must be left to 1 if not using the PG connection.                                          |
+
+Get a practical implementation example with [`.github/workflows/push-deploy.yml`](./.github/workflows/push-deploy.yml#L76).
 
 You can restrict your OpenAI API key permissions to:
 
@@ -89,30 +108,7 @@ You can restrict your OpenAI API key permissions to:
 
 ## Other deployments
 
-### Deploy for local directory
-
-<details>
-<summary>👉 Deploy locally for directory serving...</summary>
-
-1. Copy repo/documents/files to be ingested under `./api/example/`
-
-2. Copy and update env variables
-
-    ```bash
-    cp .env.example .env
-    ```
-
-3. Run the Docker container
-
-    ```bash
-    docker compose -f dir.docker-compose.yml up -d
-    ```
-
-4. Access the app at `http://localhost:3001`
-
-</details>
-
-### Deploy as stateless API
+### Deploy with Docker
 
 <details>
 <summary>👉 Deploy locally as a stateless API...</summary>
@@ -126,7 +122,7 @@ You can restrict your OpenAI API key permissions to:
 2. Run the Docker container
 
     ```bash
-    docker compose -f api.docker-compose.yml up -d
+    docker compose up --build -d
     ```
 
 3. Inject data taking example on the [Python](./scripts/ingest-docs-api.py) or [JS](./scripts/ingest-docs-api.js) scripts
@@ -158,6 +154,8 @@ You can restrict your OpenAI API key permissions to:
     make dev
     ```
 
+4. Access the app at `http://127.0.0.1:3000`
+
 </details>
 
 ## Release Action
@@ -174,15 +172,6 @@ You can restrict your OpenAI API key permissions to:
 3. Merge on `main`
 
     This will create a release based on `package.json` and push the `:latest` Docker image.
-
-## Features
-
-- [x] Directory data chat
-- [x] API data chat
-- [x] GitHub Actions release
-- [x] Secure ingestion endpoint (/api/ingest)
-- [x] Secure RepoChat with optional password
-- [ ] Maintain state over S3 (would allow containers autoscaling)
 
 ## Why not use Vercel ?
 

@@ -1,7 +1,8 @@
 const { Container, createClient } = require('@scaleway/sdk');
 
-module.exports.handleScalewayProvider = async function(inputs, parIngestSecret) {
+module.exports.handleScalewayProvider = async function(inputs) {
     const {
+        actionVersion,
         providerKeyId,
         providerKeySecret,
         providerProjectId,
@@ -11,7 +12,13 @@ module.exports.handleScalewayProvider = async function(inputs, parIngestSecret) 
         openaiModelTypeInference,
         openaiModelTypeEmbedding,
         interfacePassword,
-        dirsToScan
+        dirsToScan,
+        pgConnectionString,
+        cpuLimit,
+        memoryLimit,
+        minScale,
+        maxScale,
+        parIngestSecret
     } = inputs;
 
     const client = createClient({
@@ -22,7 +29,7 @@ module.exports.handleScalewayProvider = async function(inputs, parIngestSecret) 
         defaultZone: providerDefaultZone,
     });
 
-    const containerImage = "ghcr.io/flavienbwk/repochat-action:latest";
+    const containerImage = `ghcr.io/flavienbwk/repochat-action:${actionVersion}`;
     const containerNamespace = `gha-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
     const containerName = `gha-${process.env.GITHUB_REPOSITORY.split('/')[1]}`;
     const containerApi = new Container.v1beta1.API(client);
@@ -67,19 +74,20 @@ module.exports.handleScalewayProvider = async function(inputs, parIngestSecret) 
         { key: 'OPENAI_API_KEY', value: openaiApiKey },
         { key: 'INGEST_SECRET', value: parIngestSecret }
     ];
-    if (interfacePassword) {
+    if (interfacePassword)
         listOfSecrets.push({ key: 'INTERFACE_PASSWORD', value: interfacePassword });
-    }
+    if (pgConnectionString)
+        listOfSecrets.push({ key: 'PG_CONNECTION_STRING', value: pgConnectionString });
 
     const containerConfig = {
         name: containerName,
         namespaceId: namespace.id,
         registryImage: containerImage,
         port: 80,
-        cpuLimit: 1000,
-        memoryLimit: 1024,
-        minScale: 1,  // will lose ingested data if rebooted
-        maxScale: 1,
+        cpuLimit: parseInt(cpuLimit),
+        memoryLimit: parseInt(memoryLimit),
+        minScale: parseInt(minScale),
+        maxScale: parseInt(maxScale),
         description: 'Repochat Action repochat',
         environmentVariables: {
             MODEL_TYPE_INFERENCE: openaiModelTypeInference,
@@ -127,7 +135,7 @@ module.exports.handleScalewayProvider = async function(inputs, parIngestSecret) 
         try {
             containerEndpoint = await new Promise((resolve, reject) => {
                 const startTime = Date.now();
-                const timeout = 120000; // 2 minutes timeout
+                const timeout = 180000; // 3 minutes timeout
                 const interval = setInterval(async () => {
                     try {
                         // Update container variable with current status
@@ -157,7 +165,7 @@ module.exports.handleScalewayProvider = async function(inputs, parIngestSecret) 
         try {
             console.log('Checking settings endpoint...');
             const startTime = Date.now();
-            const timeout = 30000; // 30 seconds timeout
+            const timeout = 60000; // 60 seconds timeout
 
             while (Date.now() - startTime < timeout) {
                 try {
